@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Supervisor - Bitácora</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-light">
+
+<!-- Navbar Superior -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold" href="#">
+            <i class="bi bi-clipboard-check-fill me-2"></i>Control de Supervisor
+        </a>
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-white small"><i class="bi bi-person-badge me-1"></i> Supervisor Activo</span>
+            <a th:href="@{/login?logout}" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <!-- Solicitudes Pendientes -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-2 text-warning"></i>Solicitudes por Aprobar</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Solicitante</th>
+                        <th>Espacio Requerido</th>
+                        <th>Fecha y Hora</th>
+                        <th>Motivo / Evento</th>
+                        <th class="text-center">Dictamen</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td class="fw-bold">Ing. Sistemas Computacionales</td>
+                        <td>Sala Magna</td>
+                        <td>22/Sep/2026 (10:00 - 12:00)</td>
+                        <td>Conferencia de Arquitectura Software</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-success me-1"><i class="bi bi-check-lg"></i> Aprobar</button>
+                            <button class="btn btn-sm btn-danger"><i class="bi bi-x-lg"></i> Rechazar</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

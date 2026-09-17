@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Espacios - Iniciar Sesión</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-light d-flex align-items-center justify-content-center min-vh-100 py-4">
+
+<!-- Tarjeta ampliada a 520px para dar espacio a los logos -->
+<div class="card shadow-lg border-0 rounded-4 p-4" style="max-width: 520px; width: 100%;">
+    <div class="card-body">
+
+
+        <!-- SECCIÓN DE LOGOTIPOS INSTITUCIONALES -->
+        <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+            <!-- Logo TecNM local -->
+            <img th:src="@{/images/pleca_tecnm.jpg}" alt="TecNM" style="height: 50px; object-fit: contain;">
+
+            <div class="border-end mx-2" style="height: 40px;"></div>
+
+            <!-- Logo Instituto Tecnológico de Iguala -->
+            <img th:src="@{/images/logo-itiguala.png}" alt="IT Iguala" style="height: 50px; object-fit: contain;">
+        </div>
+
+        <!-- Título del Sistema -->
+        <div class="text-center mb-4">
+            <h3 class="fw-bold mb-1 text-primary">Gestión de Espacios</h3>
+            <p class="text-muted small mb-0">Bitácora de Control y Reservas</p>
+        </div>
+
+        <!-- FORMULARIO DE INICIO DE SESIÓN -->
+        <form th:action="@{/login}" method="POST">
+            <div class="mb-3">
+                <label for="loginEmail" class="form-label small fw-bold">Correo Electrónico</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-envelope text-muted"></i></span>
+                    <input type="email" class="form-control" id="loginEmail" name="username" placeholder="usuario@iguala.tecnm.mx" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="loginPassword" class="form-label small fw-bold">Contraseña</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-shield-lock text-muted"></i></span>
+                    <input type="password" class="form-control" id="loginPassword" name="password" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="rememberMe" name="remember-me">
+                    <label class="form-check-label small" for="rememberMe">Recordarme</label>
+                </div>
+                <a href="#" class="small text-decoration-none">¿Olvidaste tu contraseña?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Ingresar
+            </button>
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>

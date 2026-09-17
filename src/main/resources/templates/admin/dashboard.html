@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración - Bitácora</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-light">
+
+<!-- Navbar Superior -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand fw-bold" href="#">
+      <i class="bi bi-shield-lock-fill me-2"></i>Panel Administrador
+    </a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-white small"><i class="bi bi-person-circle me-1"></i> Admin General</span>
+      <a th:href="@{/login?logout}" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container my-4">
+  <!-- Indicadores Rápidos (KPIs) -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm p-3 border-start border-primary border-4 rounded-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <p class="text-muted small mb-1">Total Usuarios</p>
+            <h3 class="fw-bold mb-0">24</h3>
+          </div>
+          <i class="bi bi-people fs-1 text-primary"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm p-3 border-start border-success border-4 rounded-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <p class="text-muted small mb-1">Espacios Activos</p>
+            <h3 class="fw-bold mb-0">3</h3>
+          </div>
+          <i class="bi bi-building fs-1 text-success"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- TARJETA DE HISTORIAL CLICKEABLE -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm p-3 border-start border-warning border-4 rounded-3 h-100"
+           style="cursor: pointer;"
+           data-bs-toggle="modal"
+           data-bs-target="#modalHistorialReservas">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <p class="text-muted small mb-1">Reservas del Mes</p>
+            <h3 class="fw-bold mb-0 text-dark">82</h3>
+            <span class="text-warning small fw-bold"><i class="bi bi-clock-history me-1"></i>Ver Historial</span>
+          </div>
+          <i class="bi bi-calendar-check fs-1 text-warning"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tarjeta Contenedora de la Tabla Principal -->
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold mb-0 text-dark">
+        <i class="bi bi-door-open me-2 text-primary"></i>Gestión de Espacios Institucionales
+      </h5>
+
+      <!-- Contenedor con los 2 botones agrupados -->
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalNuevoEspacio">
+          <i class="bi bi-plus-lg me-1"></i>Nuevo Espacio
+        </button>
+        <button class="btn btn-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalNuevaReserva">
+          <i class="bi bi-calendar-plus me-1"></i>Registrar Reserva
+        </button>
+      </div>
+    </div>
+
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+          <tr>
+            <th>Nombre del Espacio</th>
+            <th>Ubicación</th>
+            <th>Capacidad</th>
+            <th>Estado</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td class="fw-bold">Sala Magna</td>
+            <td>Edificio E (Planta Alta)</td>
+            <td>160 personas</td>
+            <td><span class="badge bg-success">Disponible</span></td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td class="fw-bold">Sala Audiovisual</td>
+            <td>Edificio G</td>
+            <td>40 personas</td>
+            <td><span class="badge bg-success">Disponible</span></td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td class="fw-bold">Domo (Cancha Techada)</td>
+            <td>Área Deportiva</td>
+            <td>1300 personas</td>
+            <td><span class="badge bg-success">Disponible</span></td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 1: REGISTRAR NUEVO ESPACIO           -->
+<!-- ========================================== -->
+<div class="modal fade" id="modalNuevoEspacio" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-building-add me-2"></i>Registrar Nuevo Espacio
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form>
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Nombre del Espacio</label>
+            <input type="text" class="form-control" placeholder="Ej. Laboratorio de Cómputo B" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Ubicación / Edificio</label>
+            <input type="text" class="form-control" placeholder="Ej. Edificio F / Edificio E (Planta Alta)" required>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold small">Capacidad (personas)</label>
+              <input type="number" class="form-control" placeholder="Ej. 150" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold small">Estado Inicial</label>
+              <select class="form-select">
+                <option value="DISPONIBLE" selected>Disponible</option>
+                <option value="MANTENIMIENTO">En Mantenimiento</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary btn-sm fw-bold">Guardar Espacio</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 2: REGISTRAR RESERVA DIRECTA         -->
+<!-- ========================================== -->
+<div class="modal fade" id="modalNuevaReserva" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-calendar-event me-2"></i>Registrar Reserva Directa
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form enctype="multipart/form-data">
+        <div class="modal-body p-4">
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold small">Seleccionar Espacio</label>
+              <select class="form-select" required>
+                <option value="" selected disabled>-- Selecciona un espacio --</option>
+                <option value="1">Sala Magna - Edificio E (Planta Alta)</option>
+                <option value="2">Sala Audiovisual - Edificio G</option>
+                <option value="3">Domo Deportivo - Cancha Techada</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold small">Correo del Solicitante / Docente</label>
+              <input type="email" class="form-control" placeholder="docente@iguala.tecnm.mx" required>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold small">Fecha del Evento</label>
+              <input type="date" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold small">Horario de Uso</label>
+              <input type="text" class="form-control" placeholder="Ej. 10:00 - 12:00" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Motivo / Nombre del Evento</label>
+            <input type="text" class="form-control" placeholder="Ej. Conferencia de Computación" required>
+          </div>
+
+          <hr class="my-4 text-muted">
+
+          <h6 class="fw-bold text-success mb-3"><i class="bi bi-box-seam me-2"></i>Equipamiento y Requisiciones</h6>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Recursos Disponibles en Inventario (Marcar los requeridos)</label>
+            <div class="row g-2 bg-light p-3 rounded border">
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="invProyector" checked>
+                  <label class="form-check-label small" for="invProyector">Cañón / Proyector</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="invPantalla">
+                  <label class="form-check-label small" for="invPantalla">Pantalla de Proyección</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="invSillas">
+                  <label class="form-check-label small" for="invSillas">Sillas Adicionales</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="invClima">
+                  <label class="form-check-label small" for="invClima">Aire Acondicionado</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="invMicrofono">
+                  <label class="form-check-label small" for="invMicrofono">Micrófono Fijo</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Recursos Externos / Fuera de Inventario</label>
+            <textarea class="form-control" rows="2" placeholder="Ej. Se requieren 2 bocinas portátiles, 3 ventiladores de pedestal y mantelería para mesa de presídium."></textarea>
+          </div>
+
+          <!-- Opción para indicar la falta del oficio por urgencia -->
+          <div class="form-check form-switch mb-3 bg-warning-subtle p-3 rounded border border-warning">
+            <input class="form-check-input ms-0 me-2" type="checkbox" id="chkOficioPendiente">
+            <label class="form-check-label fw-bold small text-dark" for="chkOficioPendiente">
+              <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+              Urgencia: El docente entregará/subirá el oficio posteriormente
+            </label>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Adjuntar Oficio o Requisición Firmada (PDF / Imagen)</label>
+            <input type="file" class="form-control" accept=".pdf,.png,.jpg,.jpeg">
+            <div class="form-text small">Sube el documento de solicitud formal validado por el departamento.</div>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success btn-sm fw-bold">Confirmar Reserva</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 3: HISTORIAL DE RESERVAS (CON FOLIO) -->
+<!-- ========================================== -->
+<div class="modal fade" id="modalHistorialReservas" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-clock-history me-2"></i>Historial General de Reservas Del Mes
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+            <tr>
+              <th>Folio</th>
+              <th>Solicitante</th>
+              <th>Espacio</th>
+              <th>Fecha Evento</th>
+              <th>Horario</th>
+              <th>F. Registro</th>
+              <th>Estado</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td><span class="badge bg-dark">FOL-2026-0082</span></td>
+              <td>docente.sistemas@iguala.tecnm.mx</td>
+              <td class="fw-bold">Sala Magna</td>
+              <td>17/09/2026</td>
+              <td>13:40 - 15:00</td>
+              <td>17/09/2026 13:35</td>
+              <td><span class="badge bg-success">Aprobada (Directa)</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge bg-dark">FOL-2026-0081</span></td>
+              <td>coordinacion@iguala.tecnm.mx</td>
+              <td class="fw-bold">Sala Audiovisual</td>
+              <td>16/09/2026</td>
+              <td>10:00 - 12:00</td>
+              <td>14/09/2026 09:15</td>
+              <td><span class="badge bg-primary">Completada</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge bg-dark">FOL-2026-0080</span></td>
+              <td>industrial@iguala.tecnm.mx</td>
+              <td class="fw-bold">Domo Deportivo</td>
+              <td>15/09/2026</td>
+              <td>08:00 - 14:00</td>
+              <td>10/09/2026 11:20</td>
+              <td><span class="badge bg-danger">Oficio Pendiente</span></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JS de Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
