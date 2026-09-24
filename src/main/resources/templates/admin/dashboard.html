@@ -6,6 +6,7 @@
   <title>Panel de Administración - Bitácora</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" th:href="@{/css/custom-styles.css}">
 </head>
 <body class="bg-light">
 
@@ -75,6 +76,9 @@
 
       <!-- Contenedor con los 2 botones agrupados -->
       <div class="d-flex gap-2">
+        <button class="btn btn-info text-white fw-semibold" data-bs-toggle="modal" data-bs-target="#modalAgendaDisponibilidad">
+          <i class="bi bi-calendar3"></i> Ver Agenda
+        </button>
         <button class="btn btn-outline-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalNuevoEspacio">
           <i class="bi bi-plus-lg me-1"></i>Nuevo Espacio
         </button>
@@ -100,7 +104,7 @@
           <tr>
             <td class="fw-bold">Sala Magna</td>
             <td>Edificio E (Planta Alta)</td>
-            <td>160 personas</td>
+            <td>120 personas</td>
             <td><span class="badge bg-success">Disponible</span></td>
             <td class="text-center">
               <button class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-pencil"></i></button>
@@ -120,7 +124,7 @@
           <tr>
             <td class="fw-bold">Domo (Cancha Techada)</td>
             <td>Área Deportiva</td>
-            <td>1300 personas</td>
+            <td>800 - 1000 personas</td>
             <td><span class="badge bg-success">Disponible</span></td>
             <td class="text-center">
               <button class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-pencil"></i></button>
@@ -196,11 +200,11 @@
           <div class="row g-3 mb-3">
             <div class="col-md-6">
               <label class="form-label fw-bold small">Seleccionar Espacio</label>
-              <select class="form-select" required>
+              <select class="form-select select-espacio-inventario" id="selectEspacio" required>
                 <option value="" selected disabled>-- Selecciona un espacio --</option>
-                <option value="1">Sala Magna - Edificio E (Planta Alta)</option>
-                <option value="2">Sala Audiovisual - Edificio G</option>
-                <option value="3">Domo Deportivo - Cancha Techada</option>
+                <option value="sala_magna">Sala Magna - Edificio E (Planta Alta)</option>
+                <option value="audiovisual_1">Sala Audiovisual - Edificio G</option>
+                <option value="domo">Domo Deportivo - Cancha Techada</option>
               </select>
             </div>
             <div class="col-md-6">
@@ -230,36 +234,42 @@
           <h6 class="fw-bold text-success mb-3"><i class="bi bi-box-seam me-2"></i>Equipamiento y Requisiciones</h6>
 
           <div class="mb-3">
-            <label class="form-label fw-bold small">Recursos Disponibles en Inventario (Marcar los requeridos)</label>
-            <div class="row g-2 bg-light p-3 rounded border">
-              <div class="col-md-4">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="invProyector" checked>
-                  <label class="form-check-label small" for="invProyector">Cañón / Proyector</label>
-                </div>
+            <label class="form-label fw-bold small text-muted">Recursos Disponibles en Inventario (Marcar los requeridos)</label>
+            <div class="bg-light p-3 rounded border">
+              <div class="msg-sin-espacio text-muted fst-italic small" id="msgSinEspacio">
+                <i class="bi bi-info-circle me-1"></i> Selecciona un espacio para ver los recursos disponibles.
               </div>
-              <div class="col-md-4">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="invPantalla">
-                  <label class="form-check-label small" for="invPantalla">Pantalla de Proyección</label>
+
+              <div class="grid-inventario row g-3 d-none" id="gridInventario">
+                <div class="col-md-4 item-inventario" data-espacios="sala_magna,audiovisual_1">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="invCanon">
+                    <label class="form-check-label small" for="invCanon">Cañón / Proyector</label>
+                  </div>
                 </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="invSillas">
-                  <label class="form-check-label small" for="invSillas">Sillas Adicionales</label>
+                <div class="col-md-4 item-inventario" data-espacios="sala_magna,audiovisual_1">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="invPantalla">
+                    <label class="form-check-label small" for="invPantalla">Pantalla de Proyección</label>
+                  </div>
                 </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="invClima">
-                  <label class="form-check-label small" for="invClima">Aire Acondicionado</label>
+                <div class="col-md-4 item-inventario" data-espacios="sala_magna,domo">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="invSillas">
+                    <label class="form-check-label small" for="invSillas">Sillas Adicionales</label>
+                  </div>
                 </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="invMicrofono">
-                  <label class="form-check-label small" for="invMicrofono">Micrófono Fijo</label>
+                <div class="col-md-4 item-inventario" data-espacios="sala_magna,audiovisual_1">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="invClima">
+                    <label class="form-check-label small" for="invClima">Aire Acondicionado</label>
+                  </div>
+                </div>
+                <div class="col-md-4 item-inventario" data-espacios="sala_magna">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="invMicrofono">
+                    <label class="form-check-label small" for="invMicrofono">Micrófono Fijo</label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -285,6 +295,7 @@
             <div class="form-text small">Sube el documento de solicitud formal validado por el departamento.</div>
           </div>
         </div>
+
         <div class="modal-footer bg-light">
           <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
           <button type="submit" class="btn btn-success btn-sm fw-bold">Confirmar Reserva</button>
@@ -359,7 +370,95 @@
   </div>
 </div>
 
+<!-- ========================================== -->
+<!-- MODAL 4: AGENDA Y DISPONIBILIDAD           -->
+<!-- ========================================== -->
+<div class="modal fade" id="modalAgendaDisponibilidad" tabindex="-1" aria-labelledby="modalAgendaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title fw-bold" id="modalAgendaLabel">
+          <i class="bi bi-calendar-check me-2"></i> Consulta de Agenda y Disponibilidad
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Seleccionar Espacio</label>
+            <select class="form-select" id="selectEspacioAgenda">
+              <option value="todos">-- Todos los Espacios --</option>
+              <option value="1">Sala Magna</option>
+              <option value="2">Sala Audiovisual</option>
+              <option value="3">Domo (Cancha Techada)</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Seleccionar Fecha</label>
+            <input type="date" class="form-control" id="inputFechaAgenda" value="2026-09-21">
+          </div>
+        </div>
+
+        <div class="d-flex gap-3 mb-3 small">
+          <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Disponible</span>
+          <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Ocupado / Reservado</span>
+          <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>Pendiente Aprobación</span>
+        </div>
+
+        <div class="table-responsive border rounded">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+            <tr>
+              <th>Horario</th>
+              <th>Espacio</th>
+              <th>Estado</th>
+              <th>Evento / Solicitante</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>08:00 - 10:00</td>
+              <td>Sala Magna</td>
+              <td><span class="badge bg-success">Disponible</span></td>
+              <td class="text-muted"><em>Libre para reserva</em></td>
+            </tr>
+            <tr>
+              <td>10:00 - 12:00</td>
+              <td>Sala Magna</td>
+              <td><span class="badge bg-danger">Ocupado</span></td>
+              <td>Reunión de Academia ISC (Dr. Gómez)</td>
+            </tr>
+            <tr>
+              <td>12:00 - 14:00</td>
+              <td>Sala Magna</td>
+              <td><span class="badge bg-warning text-dark">Pendiente</span></td>
+              <td>Conferencia de Ciberseguridad</td>
+            </tr>
+            <tr>
+              <td>14:00 - 16:00</td>
+              <td>Sala Magna</td>
+              <td><span class="badge bg-success">Disponible</span></td>
+              <td class="text-muted"><em>Libre para reserva</em></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalNuevaReserva">
+          <i class="bi bi-calendar-plus me-1"></i> Ir a Registrar Reserva
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- JS de Bootstrap -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- TU ARCHIVO JAVASCRIPT PERSONALIZADO -->
+<script th:src="@{/js/main.js}"></script>
+
 </body>
 </html>

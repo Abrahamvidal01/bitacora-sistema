@@ -3,33 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis Solicitudes - Bitácora</title>
+    <title>Panel Solicitante - Reservas de Espacios</title>
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/custom-styles.css}">
 </head>
 <body class="bg-light">
 
 <!-- Navbar Superior -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+<nav class="navbar navbar-dark bg-primary shadow-sm">
     <div class="container-fluid px-4">
-        <a class="navbar-brand fw-bold text-primary" href="#">
-            <i class="bi bi-calendar-event me-2"></i>Reservas de Espacios
-        </a>
+        <span class="navbar-brand mb-0 h1 fw-bold">
+            <i class="bi bi-calendar-event me-2"></i> Reservas de Espacios
+        </span>
         <div class="d-flex align-items-center gap-3">
-            <span class="text-muted small"><i class="bi bi-person me-1"></i> Usuario Docente</span>
-            <a th:href="@{/login?logout}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</a>
+            <span class="text-white small">
+                <i class="bi bi-person-circle me-1"></i> Usuario Docente (Sistemas)
+            </span>
+            <a th:href="@{/logout}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-box-arrow-right"></i> Salir
+            </a>
         </div>
     </div>
 </nav>
 
-<div class="container my-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold text-dark mb-0">Mis Solicitudes de Reservación</h4>
-        <button class="btn btn-primary fw-bold shadow-sm"><i class="bi bi-plus-circle me-1"></i> Nueva Solicitud</button>
+<div class="container py-4">
+
+    <!-- 1. Tarjetas Resumen (KPIs) -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm border-start border-warning border-4 p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Solicitudes Pendientes</span>
+                        <h2 class="fw-bold mb-0 text-warning">1</h2>
+                    </div>
+                    <i class="bi bi-clock-history fs-1 text-warning"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm border-start border-success border-4 p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Aprobadas este Mes</span>
+                        <h2 class="fw-bold mb-0 text-success">3</h2>
+                    </div>
+                    <i class="bi bi-check-circle-fill fs-1 text-success"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm border-start border-secondary border-4 p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Total Histórico</span>
+                        <h2 class="fw-bold mb-0 text-secondary">12</h2>
+                    </div>
+                    <i class="bi bi-journal-text fs-1 text-secondary"></i>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-3">
+    <!-- ================================================================= -->
+    <!-- 2. ESPACIOS INSTITUCIONALES DISPONIBLES                           -->
+    <!-- ================================================================= -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 pt-3 pb-2">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-2 me-3 text-primary">
+                    <i class="bi bi-door-open fs-4"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold text-dark mb-0">Espacios Institucionales Disponibles</h5>
+                    <small class="text-muted">Consulta la ubicación y capacidad estimada antes de solicitar una reserva.</small>
+                </div>
+            </div>
+        </div>
+
         <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-secondary">
+                    <tr>
+                        <th scope="col" class="ps-4">Nombre del Espacio</th>
+                        <th scope="col">Ubicación</th>
+                        <th scope="col">Capacidad</th>
+                        <th scope="col" class="text-end pe-4">Estado</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td class="ps-4 fw-bold text-dark">
+                            <i class="bi bi-building me-2 text-primary"></i>Sala Magna
+                        </td>
+                        <td class="text-muted">Edificio E (Planta Alta)</td>
+                        <td>
+                            <span class="badge bg-light text-dark border fw-normal">
+                                <i class="bi bi-people me-1"></i> 120 personas
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">Disponible</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4 fw-bold text-dark">
+                            <i class="bi bi-display me-2 text-primary"></i>Sala Audiovisual 1
+                        </td>
+                        <td class="text-muted">Edificio G</td>
+                        <td>
+                            <span class="badge bg-light text-dark border fw-normal">
+                                <i class="bi bi-people me-1"></i> 40 personas
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">Disponible</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4 fw-bold text-dark">
+                            <i class="bi bi-geo-alt me-2 text-primary"></i>Domo (Cancha Techada)
+                        </td>
+                        <td class="text-muted">Área Deportiva</td>
+                        <td>
+                            <span class="badge bg-light text-dark border fw-normal">
+                                <i class="bi bi-people me-1"></i> 800 - 1000 personas
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">Disponible</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Tabla de Mis Solicitudes de Reservación -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+
+            <!-- Encabezado con Botones de Agenda y Nueva Solicitud -->
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <h4 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-list-task me-2 text-primary"></i> Mis Solicitudes de Reservación
+                </h4>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-info text-white fw-semibold" data-bs-toggle="modal" data-bs-target="#modalAgendaDisponibilidad">
+                        <i class="bi bi-calendar3 me-1"></i> Ver Agenda y Horarios
+                    </button>
+                    <button class="btn btn-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#modalNuevaSolicitud">
+                        <i class="bi bi-plus-circle-fill me-1"></i> Nueva Solicitud
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtro por Mes -->
+            <div class="row g-2 mb-3 align-items-center bg-light p-2 rounded">
+                <div class="col-auto">
+                    <label class="form-label mb-0 fw-bold small text-muted">Filtrar por Mes:</label>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select form-select-sm">
+                        <option value="actual">Septiembre 2026 (Actual)</option>
+                        <option value="agosto">Agosto 2026</option>
+                        <option value="julio">Julio 2026</option>
+                        <option value="todos">-- Todo el Historial --</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tabla de Solicitudes -->
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
@@ -37,7 +186,9 @@
                         <th>Espacio</th>
                         <th>Fecha Reservada</th>
                         <th>Horario</th>
+                        <th>Motivo / Evento</th>
                         <th>Estatus</th>
+                        <th class="text-center">Acción / Comprobante</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -45,20 +196,298 @@
                         <td class="fw-bold">Audiovisual 1</td>
                         <td>25/Sep/2026</td>
                         <td>08:00 - 10:00 hrs</td>
+                        <td>Reunión de Academia ISC</td>
                         <td><span class="badge bg-warning text-dark">Pendiente</span></td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-danger" title="Cancelar Solicitud">
+                                <i class="bi bi-x-circle me-1"></i> Cancelar
+                            </button>
+                        </td>
                     </tr>
                     <tr>
                         <td class="fw-bold">Sala Magna</td>
                         <td>10/Sep/2026</td>
                         <td>11:00 - 13:00 hrs</td>
+                        <td>Conferencia de Bienvenida</td>
                         <td><span class="badge bg-success">Aprobado</span></td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-primary" title="Descargar Pase/Póliza">
+                                <i class="bi bi-file-earmark-pdf me-1"></i> Comprobante
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="table-light text-muted">
+                        <td class="fw-bold">Cancha Techada (Domo)</td>
+                        <td>02/Sep/2026</td>
+                        <td>12:00 - 14:00 hrs</td>
+                        <td>Ensayo de Banda de Guerra</td>
+                        <td><span class="badge bg-danger">Rechazado</span></td>
+                        <td class="text-center">
+                            <span class="small text-muted">Horario no disponible</span>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
             </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- ========================================================= -->
+<!-- MODAL 1: AGENDA Y DISPONIBILIDAD                         -->
+<!-- ========================================================= -->
+<div class="modal fade" id="modalAgendaDisponibilidad" tabindex="-1" aria-labelledby="modalAgendaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title fw-bold" id="modalAgendaLabel">
+                    <i class="bi bi-calendar-check me-2"></i>Consulta de Agenda y Disponibilidad
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Seleccionar Espacio</label>
+                        <select class="form-select" id="filtroEspacioAgenda">
+                            <option value="todos" selected>-- Todos los Espacios --</option>
+                            <option value="sala_magna">Sala Magna</option>
+                            <option value="audiovisual_1">Sala Audiovisual 1</option>
+                            <option value="domo">Cancha Techada (Domo)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Seleccionar Fecha</label>
+                        <input type="date" class="form-control" value="2026-09-25">
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mb-3">
+                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Disponible</span>
+                    <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Ocupado / Reservado</span>
+                    <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>Pendiente Aprobación</span>
+                </div>
+
+                <div class="table-responsive border rounded">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th style="width: 18%;">Horario</th>
+                            <th style="width: 22%;">Espacio</th>
+                            <th style="width: 20%;">Estado</th>
+                            <th style="width: 40%;">Evento / Solicitante</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td class="fw-bold">08:00 - 10:00</td>
+                            <td>Sala Magna</td>
+                            <td><span class="badge bg-success">Disponible</span></td>
+                            <td class="text-muted fst-italic">Libre para reserva</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">10:00 - 12:00</td>
+                            <td>Sala Magna</td>
+                            <td><span class="badge bg-danger">Ocupado</span></td>
+                            <td>Reunión de Academia ISC (Dr. Gómez)</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">12:00 - 14:00</td>
+                            <td>Sala Magna</td>
+                            <td><span class="badge bg-warning text-dark">Pendiente</span></td>
+                            <td>Conferencia de Ciberseguridad</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">14:00 - 16:00</td>
+                            <td>Sala Magna</td>
+                            <td><span class="badge bg-success">Disponible</span></td>
+                            <td class="text-muted fst-italic">Libre para reserva</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">16:00 - 18:00</td>
+                            <td>Sala Magna</td>
+                            <td><span class="badge bg-success">Disponible</span></td>
+                            <td class="text-muted fst-italic">Libre para reserva</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">08:00 - 10:00</td>
+                            <td>Sala Audiovisual 1</td>
+                            <td><span class="badge bg-success">Disponible</span></td>
+                            <td class="text-muted fst-italic">Libre para reserva</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">10:00 - 12:00</td>
+                            <td>Sala Audiovisual 1</td>
+                            <td><span class="badge bg-danger">Ocupado</span></td>
+                            <td>Taller de Programación Web</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary fw-bold" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalNuevaSolicitud">
+                    <i class="bi bi-calendar-plus me-1"></i> Ir a Registrar Reserva
+                </button>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- ========================================================= -->
+<!-- MODAL 2: NUEVA SOLICITUD DE RESERVA                      -->
+<!-- ========================================================= -->
+<div class="modal fade" id="modalNuevaSolicitud" tabindex="-1" aria-labelledby="modalNuevaSolicitudLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="modalNuevaSolicitudLabel">
+                    <i class="bi bi-plus-circle me-2"></i>Nueva Solicitud de Reserva de Espacio
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="formNuevaSolicitud">
+                    <!-- Datos de la Reserva -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Espacio Académico <span class="text-danger">*</span></label>
+                            <select class="form-select select-espacio-inventario" id="selectEspacio" required>
+                                <option value="" selected disabled>-- Selecciona un espacio --</option>
+                                <option value="sala_magna">Sala Magna</option>
+                                <option value="audiovisual_1">Sala Audiovisual 1</option>
+                                <option value="domo">Cancha Techada (Domo)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Departamento / Área <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" value="Ingeniería en Sistemas Computacionales" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Fecha del Evento <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Hora de Inicio <span class="text-danger">*</span></label>
+                            <select class="form-select" required>
+                                <option value="" selected disabled>-- Seleccionar --</option>
+                                <option value="08:00">08:00 hrs</option>
+                                <option value="09:00">09:00 hrs</option>
+                                <option value="10:00">10:00 hrs</option>
+                                <option value="11:00">11:00 hrs</option>
+                                <option value="12:00">12:00 hrs</option>
+                                <option value="13:00">13:00 hrs</option>
+                                <option value="14:00">14:00 hrs</option>
+                                <option value="15:00">15:00 hrs</option>
+                                <option value="16:00">16:00 hrs</option>
+                                <option value="17:00">17:00 hrs</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Hora de Término <span class="text-danger">*</span></label>
+                            <select class="form-select" required>
+                                <option value="" selected disabled>-- Seleccionar --</option>
+                                <option value="09:00">09:00 hrs</option>
+                                <option value="10:00">10:00 hrs</option>
+                                <option value="11:00">11:00 hrs</option>
+                                <option value="12:00">12:00 hrs</option>
+                                <option value="13:00">13:00 hrs</option>
+                                <option value="14:00">14:00 hrs</option>
+                                <option value="15:00">15:00 hrs</option>
+                                <option value="16:00">16:00 hrs</option>
+                                <option value="17:00">17:00 hrs</option>
+                                <option value="18:00">18:00 hrs</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Motivo o Nombre del Evento <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" placeholder="Ej. Conferencia de Computación / Reunión de Academia" required>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Sección Equipamiento y Requisiciones -->
+                    <h6 class="fw-bold text-primary mb-3">
+                        <i class="bi bi-box-seam me-2"></i>Equipamiento y Requisiciones
+                    </h6>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Recursos Disponibles en Inventario (Marcar los requeridos)</label>
+                        <div class="bg-light p-3 rounded border">
+                            <div id="msgSinEspacio" class="text-muted fst-italic small">
+                                <i class="bi bi-info-circle me-1"></i> Selecciona un espacio para ver los recursos disponibles.
+                            </div>
+
+                            <div id="gridInventario" class="row g-3 d-none">
+                                <div class="col-md-4 item-inventario" data-espacios="sala_magna,audiovisual_1">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="reqCanon">
+                                        <label class="form-check-label small" for="reqCanon">Cañón / Proyector</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 item-inventario" data-espacios="sala_magna,audiovisual_1">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="reqPantalla">
+                                        <label class="form-check-label small" for="reqPantalla">Pantalla de Proyección</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 item-inventario" data-espacios="sala_magna,domo">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="reqSillas">
+                                        <label class="form-check-label small" for="reqSillas">Sillas Adicionales</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 item-inventario" data-espacios="sala_magna,audiovisual_1">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="reqAire">
+                                        <label class="form-check-label small" for="reqAire">Aire Acondicionado</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 item-inventario" data-espacios="sala_magna">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="reqMicrofono">
+                                        <label class="form-check-label small" for="reqMicrofono">Micrófono Fijo</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Recursos Externos / Fuera de Inventario</label>
+                        <textarea class="form-control" rows="2" placeholder="Ej. Se requieren 2 bocinas portátiles, 3 ventiladores de pedestal y mantelería para mesa de presídium."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Adjuntar Oficio o Requisición Firmada (PDF / Imagen) <span class="text-danger">*</span></label>
+                        <input class="form-control" type="file" id="oficioSolicitante" accept=".pdf, .png, .jpg, .jpeg" required>
+                        <div class="form-text">Sube el documento de solicitud formal validado por el departamento.</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="formNuevaSolicitud" class="btn btn-primary fw-bold">
+                    <i class="bi bi-send me-1"></i> Enviar Solicitud a Revisión
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS de Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script Personalizado -->
+<script th:src="@{/js/main.js}"></script>
 
 </body>
 </html>

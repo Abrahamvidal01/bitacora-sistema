@@ -2,53 +2,117 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Supervisor - Bitácora</title>
+    <title>Panel Supervisor - Sistema de Bitácora</title>
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
-<!-- Navbar Superior -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+<!-- Barra de Navegación -->
+<nav class="navbar navbar-dark bg-dark shadow-sm">
     <div class="container-fluid px-4">
-        <a class="navbar-brand fw-bold" href="#">
-            <i class="bi bi-clipboard-check-fill me-2"></i>Control de Supervisor
-        </a>
+            <span class="navbar-brand mb-0 h1 fw-bold">
+                <i class="bi bi-clipboard-check me-2"></i> Control de Supervisor
+            </span>
         <div class="d-flex align-items-center gap-3">
-            <span class="text-white small"><i class="bi bi-person-badge me-1"></i> Supervisor Activo</span>
-            <a th:href="@{/login?logout}" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</a>
+                <span class="text-white small">
+                    <i class="bi bi-person-badge me-1"></i> Supervisor Activo
+                </span>
+            <a th:href="@{/logout}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-box-arrow-right"></i> Salir
+            </a>
         </div>
     </div>
 </nav>
 
-<div class="container my-4">
-    <!-- Solicitudes Pendientes -->
-    <div class="card border-0 shadow-sm rounded-3">
-        <div class="card-header bg-white py-3">
-            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-2 text-warning"></i>Solicitudes por Aprobar</h5>
+<!-- Contenido Principal -->
+<div class="container py-4">
+
+    <!-- Tarjetas de Resumen KPI -->
+    <div class="row g-3 mb-4">
+        <!-- Tarjeta 1: Pendientes -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm border-start border-warning border-4 p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Pendientes por Aprobar</span>
+                        <h2 class="fw-bold mb-0 text-warning">1</h2>
+                    </div>
+                    <i class="bi bi-hourglass-split fs-1 text-warning"></i>
+                </div>
+            </div>
         </div>
-        <div class="card-body p-0">
+
+        <!-- Tarjeta 2: Usuarios Activos -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm border-start border-success border-4 p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Usuarios Activos</span>
+                        <h2 class="fw-bold mb-0 text-success">24</h2>
+                    </div>
+                    <i class="bi bi-people-fill fs-1 text-success"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta 3: Aprobadas este Mes + BOTÓN DE DESCARGA DE REPORTE -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm border-start border-primary border-4 p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Aprobadas este Mes</span>
+                        <h2 class="fw-bold mb-0 text-primary">82</h2>
+                    </div>
+                    <i class="bi bi-check-circle-fill fs-1 text-primary"></i>
+                </div>
+                <!-- Botones para Descargar Evidencia / Registro Físico -->
+                <div class="pt-2 border-top d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-primary w-100 fw-semibold" title="Descargar PDF Mensual">
+                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> Reporte PDF
+                    </button>
+                    <button class="btn btn-sm btn-outline-success w-100 fw-semibold" title="Exportar Excel">
+                        <i class="bi bi-file-earmark-excel-fill me-1"></i> Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. TABLA DE SOLICITUDES POR APROBAR -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold text-warning mb-3">
+                <i class="bi bi-clock-history me-2"></i> Solicitudes Pendientes de Dictamen
+            </h5>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                     <tr>
-                        <th>Solicitante</th>
+                        <th>Solicitante / Área</th>
                         <th>Espacio Requerido</th>
-                        <th>Fecha y Hora</th>
+                        <th>Fecha y Horario</th>
                         <th>Motivo / Evento</th>
-                        <th class="text-center">Dictamen</th>
+                        <th class="text-center">Acción Supervisor</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr>
                         <td class="fw-bold">Ing. Sistemas Computacionales</td>
-                        <td>Sala Magna</td>
+                        <td><span class="badge bg-secondary">Sala Magna</span></td>
                         <td>22/Sep/2026 (10:00 - 12:00)</td>
                         <td>Conferencia de Arquitectura Software</td>
                         <td class="text-center">
-                            <button class="btn btn-sm btn-success me-1"><i class="bi bi-check-lg"></i> Aprobar</button>
-                            <button class="btn btn-sm btn-danger"><i class="bi bi-x-lg"></i> Rechazar</button>
+                            <div class="d-flex justify-content-center gap-2">
+                                <button class="btn btn-sm btn-success fw-semibold">
+                                    <i class="bi bi-check-lg"></i> Aprobar
+                                </button>
+                                <button class="btn btn-sm btn-danger fw-semibold">
+                                    <i class="bi bi-x-lg"></i> Rechazar
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     </tbody>
@@ -56,7 +120,200 @@
             </div>
         </div>
     </div>
+
+    <!-- 2. TABLA DE CONTROL DE USUARIOS Y ACCESOS (CON BOTÓN DE HISTORIAL Y ALTA) -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <h5 class="fw-bold text-primary mb-0">
+                    <i class="bi bi-people-fill me-2"></i> Control de Usuarios Titulares Activos
+                </h5>
+                <div class="d-flex gap-2">
+                    <!-- BOTÓN VER HISTORIAL DE CARGOS / BAJAS -->
+                    <button class="btn btn-outline-secondary btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#modalHistorialUsuarios">
+                        <i class="bi bi-journal-text me-1"></i> Historial de Cargos y Bajas
+                    </button>
+                    <!-- BOTÓN REGISTRAR NUEVO USUARIO -->
+                    <button class="btn btn-primary btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#modalNuevoUsuario">
+                        <i class="bi bi-person-plus-fill me-1"></i> Registrar Nuevo Usuario
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Área / Cargo</th>
+                        <th>Titular Actual</th>
+                        <th>Correo Institucional</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td class="fw-bold">Recursos Materiales</td>
+                        <td>Ing. Nuevo Titular</td>
+                        <td>materiales@iguala.tecnm.mx</td>
+                        <td><span class="badge bg-success">Activo</span></td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-warning me-1" title="Cambio de cargo / Dar de baja">
+                                <i class="bi bi-person-down"></i> Dar de Baja
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" title="Eliminar registro">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Ing. Sistemas Computacionales</td>
+                        <td>Mtro. Juan Pérez</td>
+                        <td>docente.sistemas@iguala.tecnm.mx</td>
+                        <td><span class="badge bg-success">Activo</span></td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-warning me-1" title="Cambio de cargo / Dar de baja">
+                                <i class="bi bi-person-down"></i> Dar de Baja
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" title="Eliminar registro">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
 
+<!-- MODAL 1: HISTORIAL DE USUARIOS, CAMBIOS DE CARGO Y BAJAS (CON BOTONES DE DESCARGA) -->
+<div class="modal fade" id="modalHistorialUsuarios" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-clock-history me-2"></i> Historial de Cargos y Registro de Bajas
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted small mb-3">
+                    Este registro auditor muestra el historial de personas que han ocupado cargos en las áreas solicitantes. Permite consultar y descargar las evidencias de titulares anteriores.
+                </p>
+
+                <!-- Filtros de búsqueda y Botones de Exportación -->
+                <div class="row g-2 mb-3 align-items-center">
+                    <div class="col-md-5">
+                        <input type="text" class="form-control form-control-sm" placeholder="Buscar por Nombre, Área o Correo...">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select form-select-sm">
+                            <option value="todos">Todos los Registros</option>
+                            <option value="inactivos">Solo Bajas / Antiguos</option>
+                            <option value="2026">Gestión 2026</option>
+                        </select>
+                    </div>
+                    <!-- BOTONES PARA DESCARGAR EL HISTORIAL -->
+                    <div class="col-md-4 text-end d-flex gap-1 justify-content-end">
+                        <button class="btn btn-sm btn-outline-danger fw-semibold" title="Descargar Historial en PDF">
+                            <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
+                        </button>
+                        <button class="btn btn-sm btn-outline-success fw-semibold" title="Exportar Historial a Excel">
+                            <i class="bi bi-file-earmark-excel-fill me-1"></i> Excel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabla del Histórico -->
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Área / Departamento</th>
+                            <th>Titular Registrado</th>
+                            <th>Correo Institucional</th>
+                            <th>Periodo / Fecha Baja</th>
+                            <th>Estatus</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Usuario Anterior (Baja) -->
+                        <tr class="table-secondary">
+                            <td class="fw-bold">Recursos Materiales</td>
+                            <td>Ing. Titular Anterior</td>
+                            <td>materiales.old@iguala.tecnm.mx</td>
+                            <td>Ene 2025 - Ago 2026</td>
+                            <td><span class="badge bg-secondary">Baja / Inactivo</span></td>
+                        </tr>
+                        <!-- Usuario Nuevo (Activo) -->
+                        <tr>
+                            <td class="fw-bold">Recursos Materiales</td>
+                            <td>Ing. Nuevo Titular</td>
+                            <td>materiales@iguala.tecnm.mx</td>
+                            <td>Sep 2026 - Presente</td>
+                            <td><span class="badge bg-success">Activo</span></td>
+                        </tr>
+                        <!-- Otro Usuario Inactivo -->
+                        <tr class="table-secondary">
+                            <td class="fw-bold">Ciencias Básicas</td>
+                            <td>Dr. Roberto Gómez</td>
+                            <td>rgomez.old@iguala.tecnm.mx</td>
+                            <td>Mar 2024 - Jun 2026</td>
+                            <td><span class="badge bg-secondary">Baja / Inactivo</span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light d-flex justify-content-between">
+                <span class="text-muted small">Total de registros históricos: 3</span>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar Historial</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 2: REGISTRAR NUEVO USUARIO -->
+<div class="modal fade" id="modalNuevoUsuario" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-person-plus-fill me-2"></i> Alta de Nuevo Usuario Solicitante
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Área o Departamento</label>
+                        <input type="text" class="form-control" placeholder="Ej. Depto. de Recursos Materiales" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nombre del Nuevo Titular</label>
+                        <input type="text" class="form-control" placeholder="Ej. Ing. Carlos López" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Correo Institucional</label>
+                        <input type="email" class="form-control" placeholder="usuario@iguala.tecnm.mx" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Contraseña Inicial</label>
+                        <input type="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <div class="modal-footer px-0 pb-0 pt-3 border-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary fw-bold">Guardar y Activar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

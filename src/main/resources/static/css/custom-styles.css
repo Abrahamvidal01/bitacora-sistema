@@ -1,0 +1,16 @@
+/* Resaltar los bordes de los checkboxes */
+.form-check-input {
+    border: 2px solid #6c757d !important;
+    cursor: pointer;
+}
+
+/* Color cuando el checkbox está seleccionado */
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd !important;
+}
+
+/* Efecto al pasar el mouse por encima */
+.form-check-input:hover {
+    border-color: #0b5ed7 !important;
+}
