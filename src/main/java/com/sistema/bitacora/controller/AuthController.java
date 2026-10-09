@@ -1,0 +1,57 @@
+package com.sistema.bitacora.controller;
+
+import com.sistema.bitacora.entity.Rol;
+import com.sistema.bitacora.entity.Usuario;
+import com.sistema.bitacora.repository.UsuarioRepository;
+import com.sistema.bitacora.security.JwtUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/v1/auth")
+
+public class AuthController {
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private JwtUtils jwtUtils;
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
+        String correo = request.get("correo");
+        String password = request.get("password");
+
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreoInstitucional(correo);
+
+        if (usuarioOpt.isPresent()) {
+            Usuario usuario = usuarioOpt.get();
+
+            // Validación simple (en producción usar BCryptPasswordEncoder)
+            if (usuario.getPasswordHash().equals(password)) {
+
+                List<String> roles = usuario.getRoles().stream()
+                        .map(Rol::getNombreRol)
+                        .collect(Collectors.toList());
+
+                String token = jwtUtils.generateToken(usuario.getCorreoInstitucional(), roles);
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("token", token);
+                response.put("correo", usuario.getCorreoInstitucional());
+                response.put("nombre", usuario.getNombreCompleto());
+                response.put("roles", roles);
+
+                return ResponseEntity.ok(response);
+            }
+        }
+
+        return ResponseEntity.status(401).body("Credenciales incorrectas");
+    }
+
+}
