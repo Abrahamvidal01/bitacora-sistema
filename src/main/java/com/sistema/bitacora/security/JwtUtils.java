@@ -44,7 +44,7 @@ public class JwtUtils {
     }
 
     // Extrae la lista de roles almacenada dentro del token
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") //aun no se ocupa este  getRolesFromToker
     public List<String> getRolesFromToken(String token) {
         return getClaims(token).get("roles", List.class);
     }

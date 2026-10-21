@@ -35,7 +35,7 @@ public class SecurityConfig {
     // API: conserva autenticación JWT, sin utilizar sesiones.
     @Bean
     @Order(1)
-    public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
+    public SecurityFilterChain apiSecurity(HttpSecurity http)  {
         http
                 .securityMatcher("/api/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -59,7 +59,7 @@ public class SecurityConfig {
     public SecurityFilterChain webSecurity(
             HttpSecurity http,
             UserDetailsService userDetailsService
-    ) throws Exception {
+    )  {
         http
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
@@ -117,7 +117,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config) throws Exception {
+            AuthenticationConfiguration config) {
         return config.getAuthenticationManager();
     }
 

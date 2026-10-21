@@ -18,6 +18,9 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import org.jspecify.annotations.NullMarked;
+
+
 
 public class ValidacionSesionFilter extends OncePerRequestFilter {
 
@@ -31,7 +34,9 @@ public class ValidacionSesionFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
+
     @Override
+    @NullMarked
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
