@@ -7,6 +7,7 @@ import com.sistema.bitacora.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,6 +16,10 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/auth")
 
 public class AuthController {
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -27,13 +32,21 @@ public class AuthController {
         String correo = request.get("correo");
         String password = request.get("password");
 
+
+        if (correo == null || correo.isBlank()
+                || password == null || password.isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body("Correo y contraseña son obligatorios");
+        }
+
         Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreoInstitucional(correo);
 
-        if (usuarioOpt.isPresent()) {
+        if (usuarioOpt.isPresent()) {       // este comprueba que existe el usario...
             Usuario usuario = usuarioOpt.get();
 
-            // Validación simple (en producción usar BCryptPasswordEncoder)
-            if (usuario.getPasswordHash().equals(password)) {
+            // Verifica que el usuario esté activo y la contraseña coincida con BCrypt
+            if (Boolean.TRUE.equals(usuario.getActivo())
+                    && passwordEncoder.matches(password, usuario.getPasswordHash())) {
 
                 List<String> roles = usuario.getRoles().stream()
                         .map(Rol::getNombreRol)

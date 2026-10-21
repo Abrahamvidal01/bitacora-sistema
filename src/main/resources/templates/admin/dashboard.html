@@ -18,7 +18,29 @@
     </a>
     <div class="d-flex align-items-center gap-3">
       <span class="text-white small"><i class="bi bi-person-circle me-1"></i> Admin General</span>
-      <a th:href="@{/login?logout}" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</a>
+
+      <div class="d-flex gap-2">
+
+        <a th:href="@{${regresoUrl}}"
+           class="btn btn-outline-light btn-sm">
+          <i class="bi bi-arrow-left"></i>
+          <span th:text="${regresoTexto}">Volver</span>
+        </a>
+
+        <form th:action="@{/logout}" method="post" class="m-0">
+          <button type="submit" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-box-arrow-right"></i>
+            Cerrar sesión
+          </button>
+        </form>
+
+      </div>
+
+
+
+
+
+
     </div>
   </div>
 </nav>
@@ -67,6 +89,18 @@
     </div>
   </div>
 
+  <div th:if="${exitoEspacio != null}"
+       class="alert alert-success"
+       role="status"
+       th:text="${exitoEspacio}">
+  </div>
+
+  <div th:if="${errorEspacio != null}"
+       class="alert alert-danger"
+       role="alert"
+       th:text="${errorEspacio}">
+  </div>
+
   <!-- Tarjeta Contenedora de la Tabla Principal -->
   <div class="card border-0 shadow-sm rounded-3">
     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
@@ -101,34 +135,83 @@
           </tr>
           </thead>
           <tbody>
-          <tr>
-            <td class="fw-bold">Sala Magna</td>
-            <td>Edificio E (Planta Alta)</td>
-            <td>120 personas</td>
-            <td><span class="badge bg-success">Disponible</span></td>
-            <td class="text-center">
-              <button class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-pencil"></i></button>
-              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+          <tr th:if="${#lists.isEmpty(espacios)}">
+            <td colspan="5" class="text-center text-muted py-4">
+              No hay espacios registrados.
             </td>
           </tr>
-          <tr>
-            <td class="fw-bold">Sala Audiovisual</td>
-            <td>Edificio G</td>
-            <td>40 personas</td>
-            <td><span class="badge bg-success">Disponible</span></td>
-            <td class="text-center">
-              <button class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-pencil"></i></button>
-              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+
+          <tr th:each="espacio : ${espacios}">
+            <td class="fw-bold"
+                th:text="${espacio.nombreEspacio}">
             </td>
-          </tr>
-          <tr>
-            <td class="fw-bold">Domo (Cancha Techada)</td>
-            <td>Área Deportiva</td>
-            <td>800 - 1000 personas</td>
-            <td><span class="badge bg-success">Disponible</span></td>
+
+            <td th:text="${espacio.ubicacion}"></td>
+
+            <td>
+              <span th:text="${espacio.capacidad}"></span>
+              personas
+            </td>
+
+            <td>
+            <span th:if="${espacio.activo == true}"
+                  class="badge bg-primary"
+                  th:text="${espacio.estadoActual}">
+            </span>
+
+              <span th:unless="${espacio.activo == true}"
+                    class="badge bg-secondary">
+                Desactivado
+            </span>
+            </td>
+
             <td class="text-center">
-              <button class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-pencil"></i></button>
-              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+
+              <a th:href="@{/admin/espacios/{id}/inventario(id=${espacio.id})}"
+                 class="btn btn-sm btn-outline-primary me-1">
+                Inventario
+              </a>
+
+              <button type="button"
+                      class="btn btn-sm btn-outline-secondary me-1"
+                      title="Editar espacio"
+                      data-bs-toggle="modal"
+                      data-bs-target="#modalEditarEspacio"
+                      th:attr="data-id=${espacio.id},
+                 data-nombre=${espacio.nombreEspacio},
+                 data-ubicacion=${espacio.ubicacion},
+                 data-capacidad=${espacio.capacidad},
+                 data-estado=${espacio.estadoActual}">
+                <i class="bi bi-pencil"></i>
+              </button>
+
+
+              <form th:action="@{/admin/espacios/activo}"
+                    method="post"
+                    class="d-inline">
+
+                <input type="hidden"
+                       name="id"
+                       th:value="${espacio.id}">
+
+                <input type="hidden"
+                       name="activo"
+                       th:value="${espacio.activo != true}">
+
+                <button type="submit"
+                        class="btn btn-sm"
+                        th:classappend="${espacio.activo == true}
+                ? 'btn-outline-danger'
+                : 'btn-outline-success'"
+                        th:text="${espacio.activo == true}
+                ? 'Desactivar'
+                : 'Activar'">
+                  Cambiar activación
+                </button>
+
+              </form>
+
+
             </td>
           </tr>
           </tbody>
@@ -150,35 +233,96 @@
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form>
+
+      <form th:action="@{/admin/espacios}" method="post">
+
         <div class="modal-body p-4">
+
           <div class="mb-3">
-            <label class="form-label fw-bold small">Nombre del Espacio</label>
-            <input type="text" class="form-control" placeholder="Ej. Laboratorio de Cómputo B" required>
+            <label for="nuevoNombreEspacio"
+                   class="form-label fw-bold small">
+              Nombre del Espacio
+            </label>
+
+            <input type="text"
+                   id="nuevoNombreEspacio"
+                   name="nombreEspacio"
+                   class="form-control"
+                   maxlength="100"
+                   placeholder="Ej. Laboratorio de Mecatrónica"
+                   required>
           </div>
+
           <div class="mb-3">
-            <label class="form-label fw-bold small">Ubicación / Edificio</label>
-            <input type="text" class="form-control" placeholder="Ej. Edificio F / Edificio E (Planta Alta)" required>
+            <label for="nuevaUbicacion"
+                   class="form-label fw-bold small">
+              Ubicación / Edificio
+            </label>
+
+            <input type="text"
+                   id="nuevaUbicacion"
+                   name="ubicacion"
+                   class="form-control"
+                   maxlength="150"
+                   placeholder="Ej. Edificio H"
+                   required>
           </div>
+
           <div class="row g-3 mb-3">
+
             <div class="col-md-6">
-              <label class="form-label fw-bold small">Capacidad (personas)</label>
-              <input type="number" class="form-control" placeholder="Ej. 150" required>
+              <label for="nuevaCapacidad"
+                     class="form-label fw-bold small">
+                Capacidad (personas)
+              </label>
+
+              <input type="number"
+                     id="nuevaCapacidad"
+                     name="capacidad"
+                     class="form-control"
+                     min="1"
+                     max="2147483647"
+                     step="1"
+                     required>
             </div>
+
             <div class="col-md-6">
-              <label class="form-label fw-bold small">Estado Inicial</label>
-              <select class="form-select">
-                <option value="DISPONIBLE" selected>Disponible</option>
-                <option value="MANTENIMIENTO">En Mantenimiento</option>
+              <label for="nuevoEstado"
+                     class="form-label fw-bold small">
+                Estado Inicial
+              </label>
+
+              <select id="nuevoEstado"
+                      name="estadoActual"
+                      class="form-select"
+                      required>
+                <option value="DISPONIBLE">
+                  Disponible
+                </option>
+                <option value="MANTENIMIENTO">
+                  En mantenimiento
+                </option>
               </select>
             </div>
+
           </div>
         </div>
+
         <div class="modal-footer bg-light">
-          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary btn-sm fw-bold">Guardar Espacio</button>
+          <button type="button"
+                  class="btn btn-secondary btn-sm"
+                  data-bs-dismiss="modal">
+            Cancelar
+          </button>
+
+          <button type="submit"
+                  class="btn btn-primary btn-sm fw-bold">
+            Guardar Espacio
+          </button>
         </div>
+
       </form>
+
     </div>
   </div>
 </div>
@@ -331,35 +475,9 @@
               <th>Estado</th>
             </tr>
             </thead>
-            <tbody>
-            <tr>
-              <td><span class="badge bg-dark">FOL-2026-0082</span></td>
-              <td>docente.sistemas@iguala.tecnm.mx</td>
-              <td class="fw-bold">Sala Magna</td>
-              <td>17/09/2026</td>
-              <td>13:40 - 15:00</td>
-              <td>17/09/2026 13:35</td>
-              <td><span class="badge bg-success">Aprobada (Directa)</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge bg-dark">FOL-2026-0081</span></td>
-              <td>coordinacion@iguala.tecnm.mx</td>
-              <td class="fw-bold">Sala Audiovisual</td>
-              <td>16/09/2026</td>
-              <td>10:00 - 12:00</td>
-              <td>14/09/2026 09:15</td>
-              <td><span class="badge bg-primary">Completada</span></td>
-            </tr>
-            <tr>
-              <td><span class="badge bg-dark">FOL-2026-0080</span></td>
-              <td>industrial@iguala.tecnm.mx</td>
-              <td class="fw-bold">Domo Deportivo</td>
-              <td>15/09/2026</td>
-              <td>08:00 - 14:00</td>
-              <td>10/09/2026 11:20</td>
-              <td><span class="badge bg-danger">Oficio Pendiente</span></td>
-            </tr>
-            </tbody>
+
+            <tbody><tr><td colspan="7" class="text-center text-muted py-4">Historial pendiente de conectar.</td></tr></tbody>
+
           </table>
         </div>
       </div>
@@ -454,11 +572,115 @@
   </div>
 </div>
 
+<div class="modal fade"
+     id="modalEditarEspacio"
+     tabindex="-1"
+     aria-labelledby="tituloEditarEspacio"
+     aria-hidden="true">
+
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="tituloEditarEspacio">
+          Editar espacio
+        </h5>
+
+        <button type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+                aria-label="Cerrar">
+        </button>
+      </div>
+
+      <form th:action="@{/admin/espacios/editar}" method="post">
+        <input type="hidden" id="editarId" name="id">
+
+        <div class="modal-body">
+
+          <div class="mb-3">
+            <label for="editarNombre" class="form-label">
+              Nombre del espacio
+            </label>
+            <input type="text"
+                   id="editarNombre"
+                   name="nombreEspacio"
+                   class="form-control"
+                   maxlength="100"
+                   required>
+          </div>
+
+          <div class="mb-3">
+            <label for="editarUbicacion" class="form-label">
+              Ubicación
+            </label>
+            <input type="text"
+                   id="editarUbicacion"
+                   name="ubicacion"
+                   class="form-control"
+                   maxlength="150"
+                   required>
+          </div>
+
+          <div class="mb-3">
+            <label for="editarCapacidad" class="form-label">
+              Capacidad (personas)
+            </label>
+            <input type="number"
+                   id="editarCapacidad"
+                   name="capacidad"
+                   class="form-control"
+                   min="1"
+                   max="2147483647"
+                   step="1"
+                   required>
+          </div>
+
+          <div class="mb-3">
+            <label for="editarEstado" class="form-label">
+              Estado
+            </label>
+            <select id="editarEstado"
+                    name="estadoActual"
+                    class="form-select"
+                    required>
+              <option value="DISPONIBLE">
+                Disponible
+              </option>
+              <option value="MANTENIMIENTO">
+                En mantenimiento
+              </option>
+            </select>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal">
+            Cancelar
+          </button>
+
+          <button type="submit" class="btn btn-primary">
+            Guardar cambios
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
 <!-- JS de Bootstrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- TU ARCHIVO JAVASCRIPT PERSONALIZADO -->
 <script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/espacios.js}"></script>
+
+
+
 
 </body>
 </html>

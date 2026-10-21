@@ -1,10 +1,11 @@
 package com.sistema.bitacora.security;
 
+import com.sistema.bitacora.entity.Usuario;
+import com.sistema.bitacora.repository.UsuarioRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,19 +14,27 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Component
-
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtUtils jwtUtils;
+    private final JwtUtils jwtUtils;
+    private final UsuarioRepository usuarioRepository;
+
+    public JwtAuthenticationFilter(
+            JwtUtils jwtUtils,
+            UsuarioRepository usuarioRepository) {
+        this.jwtUtils = jwtUtils;
+        this.usuarioRepository = usuarioRepository;
+    }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
 
@@ -34,21 +43,40 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (jwtUtils.validateToken(token)) {
                 String correo = jwtUtils.getCorreoFromToken(token);
-                List<String> roles = jwtUtils.getRolesFromToken(token);
 
-                List<SimpleGrantedAuthority> authorities = roles.stream()
-                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                        .collect(Collectors.toList());
+                Optional<Usuario> usuarioOpt =
+                        usuarioRepository.findByCorreoInstitucional(correo);
 
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        correo, null, authorities
-                );
+                if (usuarioOpt.isEmpty()
+                        || !Boolean.TRUE.equals(usuarioOpt.get().getActivo())) {
+                    SecurityContextHolder.clearContext();
+                    response.sendError(
+                            HttpServletResponse.SC_UNAUTHORIZED,
+                            "Usuario no disponible"
+                    );
+                    return;
+                }
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                Usuario usuario = usuarioOpt.get();
+
+                List<SimpleGrantedAuthority> authorities =
+                        usuario.getRoles().stream()
+                                .map(rol -> new SimpleGrantedAuthority(
+                                        "ROLE_" + rol.getNombreRol()))
+                                .toList();
+
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                usuario.getCorreoInstitucional(),
+                                null,
+                                authorities
+                        );
+
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authentication);
             }
         }
 
         filterChain.doFilter(request, response);
     }
-
 }

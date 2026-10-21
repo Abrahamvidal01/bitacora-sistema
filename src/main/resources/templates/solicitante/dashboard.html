@@ -22,9 +22,26 @@
             <span class="text-white small">
                 <i class="bi bi-person-circle me-1"></i> Usuario Docente (Sistemas)
             </span>
-            <a th:href="@{/logout}" class="btn btn-outline-light btn-sm">
-                <i class="bi bi-box-arrow-right"></i> Salir
-            </a>
+
+            <div class="d-flex gap-2">
+
+                <a th:href="@{${regresoUrl}}"
+                   class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-arrow-left"></i>
+                    <span th:text="${regresoTexto}">Volver</span>
+                </a>
+
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-box-arrow-right"></i>
+                        Cerrar sesión
+                    </button>
+                </form>
+
+            </div>
+
+
+
         </div>
     </div>
 </nav>

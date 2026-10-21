@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Inventario del espacio</title>
+
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-primary">
+    <div class="container">
+        <span class="navbar-brand">Inventario de espacios</span>
+
+        <div class="d-flex gap-2">
+            <a th:href="@{/admin/dashboard}"
+               class="btn btn-outline-light btn-sm">
+                Volver a espacios
+            </a>
+
+            <form th:action="@{/logout}" method="post" class="m-0">
+                <button type="submit"
+                        class="btn btn-outline-light btn-sm">
+                    Cerrar sesión
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-4">
+
+    <h1 class="h3" th:text="${espacio.nombreEspacio}">
+        Nombre del espacio
+    </h1>
+
+    <p class="text-muted" th:text="${espacio.ubicacion}">
+        Ubicación
+    </p>
+
+    <div th:if="${espacio.activo != true}"
+         class="alert alert-warning">
+        Este espacio está desactivado.
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h2 class="h5 mb-0">Materiales y dispositivos</h2>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Artículo</th>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>Estado</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:if="${#lists.isEmpty(articulos)}">
+                    <td colspan="4"
+                        class="text-center text-muted py-4">
+                        Este espacio todavía no tiene inventario registrado.
+                    </td>
+                </tr>
+
+                <tr th:each="articulo : ${articulos}">
+                    <td class="fw-bold"
+                        th:text="${articulo.nombreItem}">
+                    </td>
+
+                    <td th:text="${articulo.descripcion == null
+                                ? 'Sin descripción'
+                                : articulo.descripcion}">
+                    </td>
+
+                    <td th:text="${articulo.cantidad}"></td>
+
+                    <td th:text="${articulo.estadoBien}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+</body>
+</html>
