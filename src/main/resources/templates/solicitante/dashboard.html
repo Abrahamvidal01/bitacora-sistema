@@ -183,10 +183,13 @@
             <!-- Filtro por Mes -->
             <div class="row g-2 mb-3 align-items-center bg-light p-2 rounded">
                 <div class="col-auto">
-                    <label class="form-label mb-0 fw-bold small text-muted">Filtrar por Mes:</label>
+                    <label for="filtroMesSolicitante"
+                           class="form-label mb-0 fw-bold small text-muted">
+                        Filtrar por Mes:
+                    </label>
                 </div>
                 <div class="col-md-3">
-                    <select class="form-select form-select-sm">
+                    <select id="filtroMesSolicitante" class="form-select form-select-sm">
                         <option value="actual">Septiembre 2026 (Actual)</option>
                         <option value="agosto">Agosto 2026</option>
                         <option value="julio">Julio 2026</option>
@@ -267,7 +270,7 @@
             <div class="modal-body p-4">
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">Seleccionar Espacio</label>
+                        <label for="filtroEspacioAgenda" class="form-label fw-bold"> Seleccionar Espacio   </label>
                         <select class="form-select" id="filtroEspacioAgenda">
                             <option value="todos" selected>-- Todos los Espacios --</option>
                             <option value="sala_magna">Sala Magna</option>
@@ -276,9 +279,8 @@
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">Seleccionar Fecha</label>
-                        <input type="date" class="form-control" value="2026-09-25">
-                    </div>
+                        <label for="fechaAgendaSolicitante" class="form-label fw-bold">  Seleccionar Fecha   </label>
+                        <input type="date" class="form-control" id="fechaAgendaSolicitante" value="2026-09-25">  </div>
                 </div>
 
                 <div class="d-flex gap-2 mb-3">
