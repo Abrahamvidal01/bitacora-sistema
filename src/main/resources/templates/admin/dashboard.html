@@ -466,21 +466,35 @@
 
           <!-- Opción para indicar la falta del oficio por urgencia -->
           <div class="form-check form-switch mb-3 bg-warning-subtle p-3 rounded border border-warning">
-            <input class="form-check-input ms-0 me-2" type="checkbox" id="chkOficioPendiente">
+            <input class="form-check-input ms-0 me-2"
+                   type="checkbox"
+                   id="chkOficioPendiente">
+
+            <label class="form-check-label fw-bold small text-dark"
+                   for="chkOficioPendiente">
+              <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+              Urgencia: El docente entregará/subirá el oficio posteriormente
+            </label>
+          </div>
+
+          <div class="mb-3">
             <label for="reservaDirectaOficio"
                    class="form-label fw-bold small">
               Adjuntar Oficio o Requisición Firmada (PDF / Imagen)
             </label>
-            <input type="file" id="reservaDirectaOficio"
+
+            <input type="file"
+                   id="reservaDirectaOficio"
                    class="form-control"
                    accept=".pdf,.png,.jpg,.jpeg">
+
+            <div class="form-text small">
+              Sube el documento de solicitud formal validado por el departamento.
+            </div>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label fw-bold small">Adjuntar Oficio o Requisición Firmada (PDF / Imagen)</label>
-            <input type="file" class="form-control" accept=".pdf,.png,.jpg,.jpeg">
-            <div class="form-text small">Sube el documento de solicitud formal validado por el departamento.</div>
-          </div>
+
+
 
         </div><!-- Cierre de modal-body -->
         <div class="modal-footer bg-light">
@@ -557,9 +571,7 @@
             </select>
           </div>
           <div class="col-md-6">
-            <label for="inputFechaAgenda" class="form-label fw-bold">
-              Seleccionar Fecha
-            </label>
+            <label class="form-label fw-bold">Seleccionar Fecha</label>
             <input type="date" class="form-control" id="inputFechaAgenda" value="2026-09-21">
           </div>
         </div>
