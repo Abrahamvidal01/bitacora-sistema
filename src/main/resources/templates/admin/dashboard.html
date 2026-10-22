@@ -341,36 +341,69 @@
       </div>
       <form enctype="multipart/form-data">
         <div class="modal-body p-4">
+
           <div class="row g-3 mb-3">
             <div class="col-md-6">
-              <label class="form-label fw-bold small">Seleccionar Espacio</label>
-              <select class="form-select select-espacio-inventario" id="selectEspacio" required>
-                <option value="" selected disabled>-- Selecciona un espacio --</option>
-                <option value="sala_magna">Sala Magna - Edificio E (Planta Alta)</option>
-                <option value="audiovisual_1">Sala Audiovisual - Edificio G</option>
-                <option value="domo">Domo Deportivo - Cancha Techada</option>
+              <label for="selectEspacio" class="form-label fw-bold small">
+                Seleccionar Espacio
+              </label>
+              <select class="form-select select-espacio-inventario"
+                      id="selectEspacio" required>
+                <option value="" selected disabled>
+                  -- Selecciona un espacio --
+                </option>
+                <option value="sala_magna">
+                  Sala Magna - Edificio E (Planta Alta)
+                </option>
+                <option value="audiovisual_1">
+                  Sala Audiovisual - Edificio G
+                </option>
+                <option value="domo">
+                  Domo Deportivo - Cancha Techada
+                </option>
               </select>
             </div>
+
             <div class="col-md-6">
-              <label class="form-label fw-bold small">Correo del Solicitante / Docente</label>
-              <input type="email" class="form-control" placeholder="docente@iguala.tecnm.mx" required>
+              <label for="reservaDirectaCorreo"
+                     class="form-label fw-bold small">
+                Correo del Solicitante / Docente
+              </label>
+              <input type="email" id="reservaDirectaCorreo"
+                     class="form-control"
+                     placeholder="docente@iguala.tecnm.mx" required>
             </div>
           </div>
 
           <div class="row g-3 mb-3">
             <div class="col-md-6">
-              <label class="form-label fw-bold small">Fecha del Evento</label>
-              <input type="date" class="form-control" required>
+              <label for="reservaDirectaFecha"
+                     class="form-label fw-bold small">
+                Fecha del Evento
+              </label>
+              <input type="date" id="reservaDirectaFecha"
+                     class="form-control" required>
             </div>
+
             <div class="col-md-6">
-              <label class="form-label fw-bold small">Horario de Uso</label>
-              <input type="text" class="form-control" placeholder="Ej. 10:00 - 12:00" required>
+              <label for="reservaDirectaHorario"
+                     class="form-label fw-bold small">
+                Horario de Uso
+              </label>
+              <input type="text" id="reservaDirectaHorario"
+                     class="form-control"
+                     placeholder="Ej. 10:00 - 12:00" required>
             </div>
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-bold small">Motivo / Nombre del Evento</label>
-            <input type="text" class="form-control" placeholder="Ej. Conferencia de Computación" required>
+            <label for="reservaDirectaMotivo"
+                   class="form-label fw-bold small">
+              Motivo / Nombre del Evento
+            </label>
+            <input type="text" id="reservaDirectaMotivo"
+                   class="form-control"
+                   placeholder="Ej. Conferencia de Computación" required>
           </div>
 
           <hr class="my-4 text-muted">
@@ -378,7 +411,9 @@
           <h6 class="fw-bold text-success mb-3"><i class="bi bi-box-seam me-2"></i>Equipamiento y Requisiciones</h6>
 
           <div class="mb-3">
-            <label class="form-label fw-bold small text-muted">Recursos Disponibles en Inventario (Marcar los requeridos)</label>
+            <p class="fw-bold small text-muted mb-2">
+              Recursos Disponibles en Inventario (Marcar los requeridos)
+            </p>
             <div class="bg-light p-3 rounded border">
               <div class="msg-sin-espacio text-muted fst-italic small" id="msgSinEspacio">
                 <i class="bi bi-info-circle me-1"></i> Selecciona un espacio para ver los recursos disponibles.
@@ -420,17 +455,25 @@
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-bold small">Recursos Externos / Fuera de Inventario</label>
-            <textarea class="form-control" rows="2" placeholder="Ej. Se requieren 2 bocinas portátiles, 3 ventiladores de pedestal y mantelería para mesa de presídium."></textarea>
+            <label for="reservaDirectaRecursosExternos"
+                   class="form-label fw-bold small">
+              Recursos Externos / Fuera de Inventario
+            </label>
+            <textarea id="reservaDirectaRecursosExternos"
+                      class="form-control" rows="2"
+                      placeholder="Ej. Se requieren 2 bocinas portátiles, 3 ventiladores de pedestal y mantelería para mesa de presídium."></textarea>
           </div>
 
           <!-- Opción para indicar la falta del oficio por urgencia -->
           <div class="form-check form-switch mb-3 bg-warning-subtle p-3 rounded border border-warning">
             <input class="form-check-input ms-0 me-2" type="checkbox" id="chkOficioPendiente">
-            <label class="form-check-label fw-bold small text-dark" for="chkOficioPendiente">
-              <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
-              Urgencia: El docente entregará/subirá el oficio posteriormente
+            <label for="reservaDirectaOficio"
+                   class="form-label fw-bold small">
+              Adjuntar Oficio o Requisición Firmada (PDF / Imagen)
             </label>
+            <input type="file" id="reservaDirectaOficio"
+                   class="form-control"
+                   accept=".pdf,.png,.jpg,.jpeg">
           </div>
 
           <div class="mb-3">
@@ -438,8 +481,8 @@
             <input type="file" class="form-control" accept=".pdf,.png,.jpg,.jpeg">
             <div class="form-text small">Sube el documento de solicitud formal validado por el departamento.</div>
           </div>
-        </div>
 
+        </div><!-- Cierre de modal-body -->
         <div class="modal-footer bg-light">
           <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
           <button type="submit" class="btn btn-success btn-sm fw-bold">Confirmar Reserva</button>
@@ -503,7 +546,9 @@
       <div class="modal-body p-4">
         <div class="row g-3 mb-4">
           <div class="col-md-6">
-            <label class="form-label fw-bold">Seleccionar Espacio</label>
+            <label for="selectEspacioAgenda" class="form-label fw-bold">
+              Seleccionar Espacio
+            </label>
             <select class="form-select" id="selectEspacioAgenda">
               <option value="todos">-- Todos los Espacios --</option>
               <option value="1">Sala Magna</option>
@@ -512,7 +557,9 @@
             </select>
           </div>
           <div class="col-md-6">
-            <label class="form-label fw-bold">Seleccionar Fecha</label>
+            <label for="inputFechaAgenda" class="form-label fw-bold">
+              Seleccionar Fecha
+            </label>
             <input type="date" class="form-control" id="inputFechaAgenda" value="2026-09-21">
           </div>
         </div>
