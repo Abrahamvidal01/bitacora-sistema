@@ -49,7 +49,7 @@
 <div class="container py-4">
 
     <!-- 1. Tarjetas Resumen (KPIs) -->
-    </div>
+
 
     <!-- ================================================================= -->
     <!-- 2. ESPACIOS INSTITUCIONALES DISPONIBLES                          -->
@@ -415,7 +415,7 @@
                     </h6>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold small text-muted">Recursos Disponibles en Inventario (Marcar los requeridos)</label>
+                        <p class="fw-bold small text-muted mb-2">Recursos Disponibles en Inventario (Marcar los requeridos)   </p>
                         <div class="bg-light p-3 rounded border">
                             <div id="msgSinEspacio" class="text-muted fst-italic small">
                                 <i class="bi bi-info-circle me-1"></i> Selecciona un espacio para ver los recursos disponibles.
@@ -457,12 +457,11 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Recursos Externos / Fuera de Inventario</label>
-                        <textarea class="form-control" rows="2" placeholder="Ej. Se requieren 2 bocinas portátiles, 3 ventiladores de pedestal y mantelería para mesa de presídium."></textarea>
+                        <label for="solicitudRecursosExternos" class="form-label fw-bold"> Recursos Externos / Fuera de Inventario  </label>
+                        <textarea id="solicitudRecursosExternos" class="form-control" rows="2"  placeholder="Ej. Se requieren 2 bocinas portátiles, 3 ventiladores de pedestal y mantelería para mesa de presídium."></textarea>
                     </div>
-
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Adjuntar Oficio o Requisición Firmada (PDF / Imagen) <span class="text-danger">*</span></label>
+                        <label for="oficioSolicitante" class="form-label fw-bold">Adjuntar Oficio o Requisición Firmada (PDF / Imagen) <span class="text-danger">*</span></label>
                         <input class="form-control" type="file" id="oficioSolicitante" accept=".pdf, .png, .jpg, .jpeg" required>
                         <div class="form-text">Sube el documento de solicitud formal validado por el departamento.</div>
                     </div>
