@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import org.jspecify.annotations.NullMarked;
+
 @Service
 public class UsuarioDetailsService implements UserDetailsService {
 
@@ -18,6 +20,7 @@ public class UsuarioDetailsService implements UserDetailsService {
     }
 
     @Override
+    @NullMarked
     public UserDetails loadUserByUsername(String correo)
             throws UsernameNotFoundException {
 
