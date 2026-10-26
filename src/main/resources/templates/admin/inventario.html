@@ -48,6 +48,130 @@
         Este espacio está desactivado.
     </div>
 
+    <!-- Mensajes del registro -->
+    <div th:if="${exito != null}"
+         class="alert alert-success"
+         role="status"
+         th:text="${exito}">
+    </div>
+
+    <div th:if="${error != null}"
+         class="alert alert-danger"
+         role="alert"
+         th:text="${error}">
+    </div>
+
+    <!-- Formulario para registrar un artículo -->
+    <section class="card border-0 shadow-sm mb-4"
+             aria-labelledby="tituloNuevoArticulo">
+
+        <div class="card-header bg-white py-3">
+            <h2 id="tituloNuevoArticulo"
+                class="h5 mb-0"
+                th:text="${edicionId != null
+              ? 'Editar artículo'
+              : 'Nuevo artículo'}">
+                Nuevo artículo
+            </h2>
+        </div>
+
+        <div class="card-body">
+            <form th:action="${edicionId != null}
+        ? @{/admin/espacios/{espacioId}/inventario/{articuloId}/editar(
+                espacioId=${espacio.id},
+                articuloId=${edicionId})}
+        : @{/admin/espacios/{espacioId}/inventario(
+                espacioId=${espacio.id})}"
+                  method="post">
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="nombreItem"
+                               class="form-label fw-bold">
+                            Nombre del artículo
+                        </label>
+
+                        <input type="text"
+                               id="nombreItem"
+                               name="nombreItem"
+                               class="form-control"
+                               maxlength="150"
+                               placeholder="Ej. Bancos"
+                               th:value="${nombreForm}"
+                               required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="cantidad"
+                               class="form-label fw-bold">
+                            Cantidad
+                        </label>
+
+                        <input type="number"
+                               id="cantidad"
+                               name="cantidad"
+                               class="form-control"
+                               min="1"
+                               max="2147483647"
+                               step="1"
+                               th:value="${cantidadForm != null
+                                      ? cantidadForm : '1'}"
+                               required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="estadoBien"
+                               class="form-label fw-bold">
+                            Estado del artículo
+                        </label>
+
+                        <input type="text"
+                               id="estadoBien"
+                               name="estadoBien"
+                               class="form-control"
+                               maxlength="50"
+                               placeholder="Ej. BUENO"
+                               th:value="${estadoForm != null
+                                      ? estadoForm : 'BUENO'}"
+                               required>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="descripcion"
+                               class="form-label fw-bold">
+                            Descripción — opcional
+                        </label>
+
+                        <textarea id="descripcion"
+                                  name="descripcion"
+                                  class="form-control"
+                                  rows="2"
+                                  placeholder="Ej. Bancos metálicos para laboratorio"
+                                  th:text="${descripcionForm}"></textarea>
+                    </div>
+                </div>
+
+                <div class="mt-3 d-flex gap-2">
+                    <button type="submit"
+                            class="btn btn-primary"
+                            th:text="${edicionId != null
+                      ? 'Guardar cambios'
+                      : 'Guardar artículo'}">
+                        Guardar artículo
+                    </button>
+
+                    <a th:if="${edicionId != null}"
+                       th:href="@{/admin/espacios/{id}/inventario(id=${espacio.id})}"
+                       class="btn btn-outline-secondary">
+                        Cancelar edición
+                    </a>
+                </div>
+            </form>
+        </div>
+    </section>
+
+
+
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white py-3">
             <h2 class="h5 mb-0">Materiales y dispositivos</h2>
@@ -61,12 +185,13 @@
                     <th>Descripción</th>
                     <th>Cantidad</th>
                     <th>Estado</th>
+                    <th>Acciones</th>
                 </tr>
                 </thead>
 
                 <tbody>
                 <tr th:if="${#lists.isEmpty(articulos)}">
-                    <td colspan="4"
+                    <td colspan="5"
                         class="text-center text-muted py-4">
                         Este espacio todavía no tiene inventario registrado.
                     </td>
@@ -85,6 +210,16 @@
                     <td th:text="${articulo.cantidad}"></td>
 
                     <td th:text="${articulo.estadoBien}"></td>
+
+                    <td>
+                        <a th:href="@{/admin/espacios/{espacioId}/inventario/{articuloId}/editar(
+                    espacioId=${espacio.id},
+                    articuloId=${articulo.id})}"
+                           class="btn btn-sm btn-outline-primary">
+                            Editar
+                        </a>
+                    </td>
+
                 </tr>
                 </tbody>
             </table>
