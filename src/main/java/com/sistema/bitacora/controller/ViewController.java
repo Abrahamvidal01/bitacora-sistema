@@ -11,13 +11,20 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import com.sistema.bitacora.service.EspacioService;
 
+import com.sistema.bitacora.service.NombramientoDepartamentoService;
+
 @Controller
 public class ViewController {
 
     private final EspacioService espacioService;
+    private final NombramientoDepartamentoService nombramientoService;
 
-    public ViewController(EspacioService espacioService) {
+    public ViewController(
+            EspacioService espacioService,
+            NombramientoDepartamentoService nombramientoService) {
+
         this.espacioService = espacioService;
+        this.nombramientoService = nombramientoService;
     }
 
     @GetMapping({"/", "/login"})
@@ -88,7 +95,13 @@ public class ViewController {
     }
 
     @GetMapping("/supervisor/dashboard")
-    public String supervisorDashboard() {
+    public String supervisorDashboard(Model model) {
+
+        model.addAttribute(
+                "titularesAbiertos",
+                nombramientoService.listarAbiertosParaVista()
+        );
+
         return "supervisor/dashboard";
     }
 

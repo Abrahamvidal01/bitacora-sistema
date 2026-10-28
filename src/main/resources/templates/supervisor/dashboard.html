@@ -34,7 +34,7 @@
     </div>
 </nav>
 
-<!-- Contenido Principal: los indicadores y registros son ejemplos pendientes de conectar -->
+<!-- Los indicadores, solicitudes y bitácoras siguientes siguen siendo ejemplos. -->
 <div class="container py-4">
     <!-- Tarjetas de Resumen KPI -->
     <div class="row g-3 mb-4">
@@ -81,7 +81,7 @@
         </div>
     </div>
 
-    <!-- Solicitudes pendientes -->
+    <!-- Solicitudes pendientes: ejemplo pendiente de conectar -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-4">
             <h5 class="fw-bold text-warning mb-3">
@@ -121,7 +121,7 @@
         </div>
     </div>
 
-    <!-- Bitácora de uso -->
+    <!-- Bitácora de uso: ejemplo pendiente de conectar -->
     <div class="card shadow-sm border-0 mb-4 rounded-3">
         <div class="card-body p-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -165,12 +165,12 @@
         </div>
     </div>
 
-    <!-- Control de usuarios -->
+    <!-- Control de usuarios: nombramientos conectados al modelo del controlador -->
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <h5 class="fw-bold text-primary mb-0">
-                    <i class="bi bi-people-fill me-2"></i> Control de Usuarios Titulares Activos
+                    <i class="bi bi-people-fill me-2"></i> Titulares con nombramiento abierto
                 </h5>
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-outline-secondary btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#modalHistorialUsuarios">
@@ -185,38 +185,25 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                     <tr>
-                        <th>Área / Cargo</th><th>Titular Actual</th><th>Correo Institucional</th>
-                        <th>Estado</th><th class="text-center">Acciones</th>
+                        <th>Área / Departamento</th>
+                        <th>Titular registrado</th>
+                        <th>Correo institucional</th>
+                        <th>Desde</th>
+                        <th>Nombramiento</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <td class="fw-bold">Recursos Materiales</td>
-                        <td>Ing. Nuevo Titular</td>
-                        <td>materiales@iguala.tecnm.mx</td>
-                        <td><span class="badge bg-success">Activo</span></td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-outline-warning me-1" title="Cambio de cargo / Dar de baja">
-                                <i class="bi bi-person-down"></i> Dar de Baja
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar registro" aria-label="Eliminar registro de Recursos Materiales">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                    <tr th:if="${#lists.isEmpty(titularesAbiertos)}">
+                        <td colspan="5" class="text-center text-muted py-4">
+                            Sin nombramientos registrados.
                         </td>
                     </tr>
-                    <tr>
-                        <td class="fw-bold">Ing. Sistemas Computacionales</td>
-                        <td>Mtro. Juan Pérez</td>
-                        <td>docente.sistemas@iguala.tecnm.mx</td>
-                        <td><span class="badge bg-success">Activo</span></td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-outline-warning me-1" title="Cambio de cargo / Dar de baja">
-                                <i class="bi bi-person-down"></i> Dar de Baja
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar registro" aria-label="Eliminar registro de Sistemas Computacionales">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
+                    <tr th:each="titular : ${titularesAbiertos}">
+                        <td class="fw-bold" th:text="${titular.departamento}"></td>
+                        <td th:text="${titular.nombre}"></td>
+                        <td th:text="${titular.correo}"></td>
+                        <td th:text="${#temporals.format(titular.fechaInicio, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td><span class="badge bg-primary">Abierto</span></td>
                     </tr>
                     </tbody>
                 </table>
@@ -283,7 +270,7 @@
     </div>
 </div>
 
-<!-- Modal: historial de usuarios -->
+<!-- Modal: historial de usuarios, pendiente de conectar -->
 <div class="modal fade" id="modalHistorialUsuarios" tabindex="-1" aria-labelledby="modalHistorialUsuariosTitulo" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow">
@@ -295,7 +282,7 @@
             </div>
             <div class="modal-body p-4">
                 <p class="text-muted small mb-3">
-                    Este registro auditor muestra el historial de personas que han ocupado cargos en las áreas solicitantes. Permite consultar y descargar las evidencias de titulares anteriores.
+                    La consulta del historial, la búsqueda y las exportaciones están pendientes de conectar.
                 </p>
                 <div class="row g-2 mb-3 align-items-center">
                     <div class="col-md-5">
@@ -323,38 +310,25 @@
                     <table class="table table-sm table-bordered table-hover align-middle">
                         <thead class="table-light">
                         <tr>
-                            <th>Área / Departamento</th><th>Titular Registrado</th><th>Correo Institucional</th>
-                            <th>Periodo / Fecha Baja</th><th>Estatus</th>
+                            <th>Área / Departamento</th>
+                            <th>Titular Registrado</th>
+                            <th>Correo Institucional</th>
+                            <th>Periodo / Fecha Baja</th>
+                            <th>Estatus</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr class="table-secondary">
-                            <td class="fw-bold">Recursos Materiales</td>
-                            <td>Ing. Titular Anterior</td>
-                            <td>materiales.old@iguala.tecnm.mx</td>
-                            <td>Ene 2025 - Ago 2026</td>
-                            <td><span class="badge bg-secondary">Baja / Inactivo</span></td>
-                        </tr>
                         <tr>
-                            <td class="fw-bold">Recursos Materiales</td>
-                            <td>Ing. Nuevo Titular</td>
-                            <td>materiales@iguala.tecnm.mx</td>
-                            <td>Sep 2026 - Presente</td>
-                            <td><span class="badge bg-success">Activo</span></td>
-                        </tr>
-                        <tr class="table-secondary">
-                            <td class="fw-bold">Ciencias Básicas</td>
-                            <td>Dr. Roberto Gómez</td>
-                            <td>rgomez.old@iguala.tecnm.mx</td>
-                            <td>Mar 2024 - Jun 2026</td>
-                            <td><span class="badge bg-secondary">Baja / Inactivo</span></td>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                Consulta del historial pendiente de conectar.
+                            </td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
             <div class="modal-footer bg-light d-flex justify-content-between">
-                <span class="text-muted small">Total de registros históricos: 3</span>
+                <span class="text-muted small">Historial pendiente de conectar</span>
                 <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar Historial</button>
             </div>
         </div>
