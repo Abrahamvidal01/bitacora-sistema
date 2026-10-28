@@ -107,14 +107,17 @@
 
 
         <dependency>
-
-            <groupId>com.mysql</groupId>
-
-            <artifactId>mysql-connector-j</artifactId>
-
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
             <scope>runtime</scope>
-
         </dependency>
+
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-community-dialects</artifactId>
+        </dependency>
+
+
 
         <dependency>
 
