@@ -347,19 +347,20 @@
               <label for="selectEspacio" class="form-label fw-bold small">
                 Seleccionar Espacio
               </label>
-              <select class="form-select select-espacio-inventario"
-                      id="selectEspacio" required>
+              <select class="form-select"
+                      id="selectEspacio"
+                      name="espacioId"
+                      required>
+
                 <option value="" selected disabled>
                   -- Selecciona un espacio --
                 </option>
-                <option value="sala_magna">
-                  Sala Magna - Edificio E (Planta Alta)
-                </option>
-                <option value="audiovisual_1">
-                  Sala Audiovisual - Edificio G
-                </option>
-                <option value="domo">
-                  Domo Deportivo - Cancha Techada
+
+                <option th:each="espacio : ${espacios}"
+                        th:if="${espacio.activo == true}"
+                        th:value="${espacio.id}"
+                        th:text="${espacio.nombreEspacio + ' - ' + espacio.ubicacion}"
+                        th:attr="data-inventario-url=@{/admin/espacios/{id}/inventario/datos(id=${espacio.id})}">
                 </option>
               </select>
             </div>
@@ -381,8 +382,11 @@
                      class="form-label fw-bold small">
                 Fecha del Evento
               </label>
-              <input type="date" id="reservaDirectaFecha"
-                     class="form-control" required>
+              <input type="date"
+                     id="reservaDirectaFecha"
+                     name="fechaEvento"
+                     class="form-control"
+                     required>
             </div>
 
             <div class="col-md-6">
@@ -408,48 +412,26 @@
 
           <hr class="my-4 text-muted">
 
-          <h6 class="fw-bold text-success mb-3"><i class="bi bi-box-seam me-2"></i>Equipamiento y Requisiciones</h6>
+          <h6 class="fw-bold text-success mb-3">
+            <i class="bi bi-box-seam me-2"></i>
+            Equipamiento y Requisiciones
+          </h6>
 
           <div class="mb-3">
             <p class="fw-bold small text-muted mb-2">
               Recursos Disponibles en Inventario (Marcar los requeridos)
             </p>
-            <div class="bg-light p-3 rounded border">
-              <div class="msg-sin-espacio text-muted fst-italic small" id="msgSinEspacio">
-                <i class="bi bi-info-circle me-1"></i> Selecciona un espacio para ver los recursos disponibles.
-              </div>
 
-              <div class="grid-inventario row g-3 d-none" id="gridInventario">
-                <div class="col-md-4 item-inventario" data-espacios="sala_magna,audiovisual_1">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="invCanon">
-                    <label class="form-check-label small" for="invCanon">Cañón / Proyector</label>
-                  </div>
-                </div>
-                <div class="col-md-4 item-inventario" data-espacios="sala_magna,audiovisual_1">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="invPantalla">
-                    <label class="form-check-label small" for="invPantalla">Pantalla de Proyección</label>
-                  </div>
-                </div>
-                <div class="col-md-4 item-inventario" data-espacios="sala_magna,domo">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="invSillas">
-                    <label class="form-check-label small" for="invSillas">Sillas Adicionales</label>
-                  </div>
-                </div>
-                <div class="col-md-4 item-inventario" data-espacios="sala_magna,audiovisual_1">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="invClima">
-                    <label class="form-check-label small" for="invClima">Aire Acondicionado</label>
-                  </div>
-                </div>
-                <div class="col-md-4 item-inventario" data-espacios="sala_magna">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="invMicrofono">
-                    <label class="form-check-label small" for="invMicrofono">Micrófono Fijo</label>
-                  </div>
-                </div>
+            <div class="bg-light p-3 rounded border">
+              <p id="msgSinEspacio"
+                 class="text-muted small mb-0"
+                 role="status"
+                 aria-live="polite">
+                Selecciona un espacio para consultar su inventario.
+              </p>
+
+              <div id="gridInventario"
+                   class="row g-3 d-none">
               </div>
             </div>
           </div>
@@ -459,37 +441,71 @@
                    class="form-label fw-bold small">
               Recursos Externos / Fuera de Inventario
             </label>
+
             <textarea id="reservaDirectaRecursosExternos"
-                      class="form-control" rows="2"
-                      placeholder="Ej. Se requieren 2 bocinas portátiles, 3 ventiladores de pedestal y mantelería para mesa de presídium."></textarea>
+                      name="recursosExternos"
+                      class="form-control"
+                      rows="3"
+                      aria-describedby="ayudaRecursosExternos"
+                      placeholder="Ej. 20 sillas adicionales, 2 ventiladores y 5 manteles."></textarea>
+
+            <div id="ayudaRecursosExternos" class="form-text">
+              Describe los recursos adicionales y sus cantidades.
+              Deja este campo vacío si no los necesitas.
+            </div>
+
+            <div id="avisoRecursosExternos"
+                 class="alert alert-warning mt-3 mb-0"
+                 role="status"
+                 aria-live="polite"
+                 hidden>
+              Estás solicitando recursos que no pertenecen al inventario
+              de este espacio. Su solicitud no garantiza disponibilidad.
+              Los requisitos de documentación y autorización están
+              pendientes de definir.
+            </div>
           </div>
 
-          <!-- Opción para indicar la falta del oficio por urgencia -->
-          <div class="form-check form-switch mb-3 bg-warning-subtle p-3 rounded border border-warning">
-            <input class="form-check-input ms-0 me-2"
-                   type="checkbox"
-                   id="chkOficioPendiente">
-
-            <label class="form-check-label fw-bold small text-dark"
-                   for="chkOficioPendiente">
-              <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
-              Urgencia: El docente entregará/subirá el oficio posteriormente
-            </label>
-          </div>
+<!--          Adjuntar Oficio o Requisición Firmada -->
 
           <div class="mb-3">
             <label for="reservaDirectaOficio"
                    class="form-label fw-bold small">
-              Adjuntar Oficio o Requisición Firmada (PDF / Imagen)
+              Oficio de reservación
             </label>
 
             <input type="file"
                    id="reservaDirectaOficio"
+                   name="oficioReservacion"
                    class="form-control"
-                   accept=".pdf,.png,.jpg,.jpeg">
+                   accept=".pdf,.png,.jpg,.jpeg"
+                   aria-describedby="ayudaOficioReservacion">
 
-            <div class="form-text small">
-              Sube el documento de solicitud formal validado por el departamento.
+            <div id="ayudaOficioReservacion" class="form-text">
+              Obligatorio para toda reserva. Cuando se autorice su
+              entrega posterior por urgencia, deberá adjuntarse como
+              máximo cuatro horas después de finalizar el evento.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="reservaDirectaRequisicion"
+                   class="form-label fw-bold small">
+              Requisición de recursos externos
+            </label>
+
+            <input type="file"
+                   id="reservaDirectaRequisicion"
+                   name="requisicion"
+                   class="form-control"
+                   accept=".pdf,.png,.jpg,.jpeg"
+                   aria-describedby="ayudaRequisicion">
+
+            <div id="ayudaRequisicion" class="form-text">
+              Obligatoria cuando se soliciten compras o recursos
+              de proveedores externos. Cuando se autorice su entrega
+              posterior por urgencia, deberá adjuntarse como máximo
+              cuatro horas después de finalizar el evento.
             </div>
           </div>
 
@@ -737,9 +753,8 @@
 <!-- TU ARCHIVO JAVASCRIPT PERSONALIZADO -->
 <script th:src="@{/js/main.js}"></script>
 <script th:src="@{/js/espacios.js}"></script>
-
-
-
+<script th:src="@{/js/reserva-inventario.js}"></script>
+<script th:src="@{/js/recursos-externos.js}"></script>
 
 </body>
 </html>
