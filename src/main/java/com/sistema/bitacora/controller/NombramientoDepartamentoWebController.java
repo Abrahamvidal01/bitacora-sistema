@@ -6,6 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -82,6 +83,71 @@ public class NombramientoDepartamentoWebController {
         return "redirect:/supervisor/nombramientos/nuevo";
     }
 
+    @GetMapping("/{nombramientoId}/finalizar")
+    public String formularioFinalizar(
+            @PathVariable("nombramientoId") Long nombramientoId,
+            Model model,
+            RedirectAttributes redirect) {
+
+        try {
+            model.addAttribute("nombramiento",
+                    nombramientoService.obtenerAbiertoParaFinalizar(nombramientoId));
+        } catch (ResponseStatusException ex) {
+            int estado = ex.getStatusCode().value();
+            if (estado != 400 && estado != 404 && estado != 409) {
+                throw ex;
+            }
+            redirect.addFlashAttribute("errorNombramiento", ex.getReason());
+            return "redirect:/supervisor/dashboard";
+        }
+
+        if (!model.containsAttribute("fechaFinForm")) {
+            model.addAttribute("fechaFinForm", "");
+        }
+        if (!model.containsAttribute("motivoFinForm")) {
+            model.addAttribute("motivoFinForm", "");
+        }
+
+        return "supervisor/nombramiento-finalizar";
+    }
+
+    @PostMapping("/{nombramientoId}/finalizar")
+    public String finalizar(
+            @PathVariable("nombramientoId") Long nombramientoId,
+            @RequestParam(name = "fechaFin", defaultValue = "") String fechaFin,
+            @RequestParam(name = "motivoFin", defaultValue = "") String motivoFin,
+            RedirectAttributes redirect) {
+
+        try {
+            LocalDateTime fin = LocalDateTime.parse(fechaFin.trim());
+            nombramientoService.finalizar(nombramientoId, fin, motivoFin);
+
+            redirect.addFlashAttribute("exitoNombramiento",
+                    "Nombramiento finalizado correctamente. "
+                            + "Se conservó el registro histórico y no se eliminó la cuenta.");
+            return "redirect:/supervisor/dashboard";
+        } catch (DateTimeParseException ex) {
+            prepararErrorFinalizacion(redirect, fechaFin, motivoFin,
+                    "Indica una fecha y hora de finalización válida.");
+        } catch (ResponseStatusException ex) {
+            int estado = ex.getStatusCode().value();
+            if (estado == 404 || estado == 409) {
+                redirect.addFlashAttribute("errorNombramiento", ex.getReason());
+                return "redirect:/supervisor/dashboard";
+            }
+            if (estado != 400) {
+                throw ex;
+            }
+            prepararErrorFinalizacion(redirect, fechaFin, motivoFin,
+                    ex.getReason() == null
+                            ? "No se pudo finalizar el nombramiento."
+                            : ex.getReason());
+        }
+
+        return "redirect:/supervisor/nombramientos/"
+                + nombramientoId + "/finalizar";
+    }
+
     private void prepararError(
             RedirectAttributes redirect,
             String departamentoId,
@@ -93,5 +159,16 @@ public class NombramientoDepartamentoWebController {
         redirect.addFlashAttribute("departamentoSeleccionado", departamentoId);
         redirect.addFlashAttribute("usuarioSeleccionado", usuarioId);
         redirect.addFlashAttribute("fechaInicioForm", fechaInicio);
+    }
+
+    private void prepararErrorFinalizacion(
+            RedirectAttributes redirect,
+            String fechaFin,
+            String motivoFin,
+            String mensaje) {
+
+        redirect.addFlashAttribute("error", mensaje);
+        redirect.addFlashAttribute("fechaFinForm", fechaFin);
+        redirect.addFlashAttribute("motivoFinForm", motivoFin);
     }
 }

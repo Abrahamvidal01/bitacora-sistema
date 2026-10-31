@@ -55,6 +55,7 @@ public class NombramientoDepartamentoService {
                 .findByFechaFinIsNullOrderByDepartamento_NombreDepartamentoAsc()
                 .stream()
                 .map(n -> new TitularVista(
+                        n.getId(),
                         n.getDepartamento().getNombreDepartamento(),
                         n.getUsuario().getNombreCompleto(),
                         n.getUsuario().getCorreoInstitucional(),
@@ -195,6 +196,7 @@ public class NombramientoDepartamentoService {
     }
 
     public record TitularVista(
+            Long id,
             String departamento,
             String nombre,
             String correo,
@@ -258,5 +260,97 @@ public class NombramientoDepartamentoService {
             List<UsuarioOpcion> usuarios
     ) {
     }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void finalizar(
+            Long nombramientoId,
+            LocalDateTime fechaFin,
+            String motivoFin) {
+
+        validarId(nombramientoId, "nombramiento");
+
+        if (fechaFin == null) {
+            throw error(HttpStatus.BAD_REQUEST,
+                    "La fecha de finalización es obligatoria");
+        }
+
+        if (fechaFin.isAfter(LocalDateTime.now())) {
+            throw error(HttpStatus.BAD_REQUEST,
+                    "La finalización no puede estar en el futuro");
+        }
+
+        if (motivoFin == null || motivoFin.isBlank()
+                || motivoFin.trim().length() > 255) {
+            throw error(HttpStatus.BAD_REQUEST,
+                    "El motivo es obligatorio y admite hasta 255 caracteres");
+        }
+
+        Usuario supervisor = obtenerSupervisorActual();
+
+        Long departamentoId = nombramientoRepository
+                .buscarDepartamentoId(nombramientoId)
+                .orElseThrow(() -> error(
+                        HttpStatus.NOT_FOUND,
+                        "El nombramiento no existe"
+                ));
+
+        // Usa el mismo bloqueo por departamento que el registro de altas.
+        departamentoRepository
+                .buscarPorIdParaActualizar(departamentoId)
+                .orElseThrow(() -> error(
+                        HttpStatus.NOT_FOUND,
+                        "El departamento no existe"
+                ));
+
+        NombramientoDepartamento nombramiento =
+                nombramientoRepository.findById(nombramientoId)
+                        .orElseThrow(() -> error(
+                                HttpStatus.NOT_FOUND,
+                                "El nombramiento no existe"
+                        ));
+
+        if (nombramiento.getFechaFin() != null) {
+            throw error(HttpStatus.CONFLICT,
+                    "El nombramiento ya está finalizado");
+        }
+
+        if (fechaFin.isBefore(nombramiento.getFechaInicio())) {
+            throw error(HttpStatus.BAD_REQUEST,
+                    "La finalización no puede ser anterior al inicio del cargo");
+        }
+
+        nombramiento.setFechaFin(fechaFin);
+        nombramiento.setMotivoFin(motivoFin.trim());
+        nombramiento.setFinalizadoPor(supervisor);
+
+        nombramientoRepository.saveAndFlush(nombramiento);
+    }
+
+
+    public TitularVista obtenerAbiertoParaFinalizar(Long nombramientoId) {
+
+        validarId(nombramientoId, "nombramiento");
+
+        NombramientoDepartamento nombramiento =
+                nombramientoRepository.findById(nombramientoId)
+                        .orElseThrow(() -> error(
+                                HttpStatus.NOT_FOUND,
+                                "El nombramiento no existe"
+                        ));
+
+        if (nombramiento.getFechaFin() != null) {
+            throw error(HttpStatus.CONFLICT,
+                    "El nombramiento ya está finalizado");
+        }
+
+        return new TitularVista(
+                nombramiento.getId(),
+                nombramiento.getDepartamento().getNombreDepartamento(),
+                nombramiento.getUsuario().getNombreCompleto(),
+                nombramiento.getUsuario().getCorreoInstitucional(),
+                nombramiento.getFechaInicio()
+        );
+    }
+
 
 }

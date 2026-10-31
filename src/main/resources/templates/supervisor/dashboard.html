@@ -188,6 +188,19 @@
                 </div>
             </div>
             <div class="table-responsive">
+
+                <div th:if="${exitoNombramiento != null}"
+                     class="alert alert-success"
+                     role="status"
+                     th:text="${exitoNombramiento}">
+                </div>
+
+                <div th:if="${errorNombramiento != null}"
+                     class="alert alert-danger"
+                     role="alert"
+                     th:text="${errorNombramiento}">
+                </div>
+
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                     <tr>
@@ -196,20 +209,39 @@
                         <th>Correo institucional</th>
                         <th>Desde</th>
                         <th>Nombramiento</th>
+                        <th>Acciones</th>
                     </tr>
                     </thead>
+
                     <tbody>
                     <tr th:if="${#lists.isEmpty(titularesAbiertos)}">
-                        <td colspan="5" class="text-center text-muted py-4">
-                            Sin nombramientos registrados.
+                        <td colspan="6" class="text-center text-muted py-4">
+                            Sin nombramientos abiertos.
                         </td>
                     </tr>
+
                     <tr th:each="titular : ${titularesAbiertos}">
-                        <td class="fw-bold" th:text="${titular.departamento}"></td>
+                        <td class="fw-bold"
+                            th:text="${titular.departamento}"></td>
+
                         <td th:text="${titular.nombre}"></td>
+
                         <td th:text="${titular.correo}"></td>
-                        <td th:text="${#temporals.format(titular.fechaInicio, 'dd/MM/yyyy HH:mm')}"></td>
-                        <td><span class="badge bg-primary">Abierto</span></td>
+
+                        <td th:text="${#temporals.format(
+                titular.fechaInicio, 'dd/MM/yyyy HH:mm')}"></td>
+
+                        <td>
+                            <span class="badge bg-primary">Abierto</span>
+                        </td>
+
+                        <td>
+                            <a th:href="@{/supervisor/nombramientos/{id}/finalizar(
+                    id=${titular.id})}"
+                               class="btn btn-outline-warning btn-sm text-nowrap">
+                                Finalizar nombramiento
+                            </a>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
