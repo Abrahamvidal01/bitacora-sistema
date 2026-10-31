@@ -353,4 +353,41 @@ public class NombramientoDepartamentoService {
     }
 
 
+    public List<HistorialNombramientoVista> listarHistorialParaVista() {
+
+        return nombramientoRepository
+                .findAllByOrderByFechaInicioDescIdDesc()
+                .stream()
+                .map(n -> new HistorialNombramientoVista(
+                        n.getId(),
+                        n.getDepartamento().getNombreDepartamento(),
+                        n.getUsuario().getNombreCompleto(),
+                        n.getUsuario().getCorreoInstitucional(),
+                        n.getFechaInicio(),
+                        n.getFechaFin(),
+                        n.getFechaRegistro(),
+                        n.getRegistradoPor().getNombreCompleto(),
+                        n.getFinalizadoPor() == null
+                                ? null
+                                : n.getFinalizadoPor().getNombreCompleto(),
+                        n.getMotivoFin()
+                ))
+                .toList();
+    }
+
+    public record HistorialNombramientoVista(
+            Long id,
+            String departamento,
+            String titular,
+            String correo,
+            LocalDateTime fechaInicio,
+            LocalDateTime fechaFin,
+            LocalDateTime fechaRegistro,
+            String autorAlta,
+            String autorFin,
+            String motivoFin
+    ) {
+    }
+
+
 }

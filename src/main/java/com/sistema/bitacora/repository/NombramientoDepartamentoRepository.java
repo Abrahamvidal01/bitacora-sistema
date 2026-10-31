@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 public interface NombramientoDepartamentoRepository
         extends JpaRepository<NombramientoDepartamento, Long> {
@@ -35,4 +36,14 @@ public interface NombramientoDepartamentoRepository
     Optional<Long> buscarDepartamentoId(
             @Param("nombramientoId") Long nombramientoId
     );
+
+    @EntityGraph(attributePaths = {
+            "departamento",
+            "usuario",
+            "registradoPor",
+            "finalizadoPor"
+    })
+    List<NombramientoDepartamento>
+    findAllByOrderByFechaInicioDescIdDesc();
+
 }

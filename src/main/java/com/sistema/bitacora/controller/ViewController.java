@@ -102,6 +102,11 @@ public class ViewController {
                 nombramientoService.listarAbiertosParaVista()
         );
 
+        model.addAttribute(
+                "historialNombramientos",
+                nombramientoService.listarHistorialParaVista()
+        );
+
         return "supervisor/dashboard";
     }
 

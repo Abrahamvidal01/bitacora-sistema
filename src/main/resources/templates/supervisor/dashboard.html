@@ -308,70 +308,99 @@
     </div>
 </div>
 
-<!-- Modal: historial de usuarios, pendiente de conectar -->
-<div class="modal fade" id="modalHistorialUsuarios" tabindex="-1" aria-labelledby="modalHistorialUsuariosTitulo" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<!-- Modal: historial de usuarios -->
+<div class="modal fade" id="modalHistorialUsuarios" tabindex="-1"
+     aria-labelledby="modalHistorialUsuariosTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-dark text-white">
                 <h5 class="modal-title fw-bold" id="modalHistorialUsuariosTitulo">
-                    <i class="bi bi-clock-history me-2"></i> Historial de Cargos y Registro de Bajas
+                    <i class="bi bi-clock-history me-2"></i> Historial de Cargos y Finalizaciones
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
+
             <div class="modal-body p-4">
-                <p class="text-muted small mb-3">
-                    La consulta del historial, la búsqueda y las exportaciones están pendientes de conectar.
+                <p class="text-muted small mb-2">
+                    Consulta los nombramientos abiertos y finalizados, sus periodos y los responsables de cada operación.
+                    Un cargo finalizado no significa que la cuenta del usuario esté desactivada.
                 </p>
-                <div class="row g-2 mb-3 align-items-center">
-                    <div class="col-md-5">
-                        <label for="buscarHistorialUsuarios" class="visually-hidden">Buscar por nombre, área o correo</label>
-                        <input type="text" id="buscarHistorialUsuarios" class="form-control form-control-sm" placeholder="Buscar por Nombre, Área o Correo...">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="filtroHistorialUsuarios" class="visually-hidden">Filtrar registros del historial</label>
-                        <select id="filtroHistorialUsuarios" class="form-select form-select-sm">
-                            <option value="todos">Todos los Registros</option>
-                            <option value="inactivos">Solo Bajas / Antiguos</option>
-                            <option value="2026">Gestión 2026</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 text-end d-flex gap-1 justify-content-end">
-                        <button type="button" class="btn btn-sm btn-outline-danger fw-semibold" title="Descargar Historial en PDF">
-                            <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-success fw-semibold" title="Exportar Historial a Excel">
-                            <i class="bi bi-file-earmark-excel-fill me-1"></i> Excel
-                        </button>
-                    </div>
-                </div>
+                <p class="text-muted small mb-3">
+                    Consulta de solo lectura. La búsqueda, los filtros y las exportaciones se conectarán después.
+                </p>
+
                 <div class="table-responsive">
-                    <table class="table table-sm table-bordered table-hover align-middle">
+                    <table class="table table-sm table-bordered table-hover align-middle mb-0">
                         <thead class="table-light">
                         <tr>
-                            <th>Área / Departamento</th>
-                            <th>Titular Registrado</th>
-                            <th>Correo Institucional</th>
-                            <th>Periodo / Fecha Baja</th>
-                            <th>Estatus</th>
+                            <th>Departamento</th>
+                            <th>Titular registrado</th>
+                            <th>Periodo del cargo</th>
+                            <th>Estado del cargo</th>
+                            <th>Registrado por</th>
+                            <th>Finalizado por</th>
+                            <th>Motivo de finalización</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-4">
-                                Consulta del historial pendiente de conectar.
+                        <tr th:if="${#lists.isEmpty(historialNombramientos)}">
+                            <td colspan="7" class="text-center text-muted py-4">
+                                Sin nombramientos en el historial.
                             </td>
+                        </tr>
+                        <tr th:each="registro : ${historialNombramientos}">
+                            <td>
+                                <div class="fw-bold" th:text="${registro.departamento}"></div>
+                                <small class="text-muted" th:text="|Nombramiento #${registro.id}|"></small>
+                            </td>
+                            <td>
+                                <div th:text="${registro.titular}"></div>
+                                <small class="text-muted" th:text="${registro.correo}"></small>
+                            </td>
+                            <td>
+                                <div>
+                                    <span class="fw-semibold">Inicio:</span>
+                                    <span th:text="${#temporals.format(registro.fechaInicio, 'dd/MM/yyyy HH:mm')}"></span>
+                                </div>
+                                <div>
+                                    <span class="fw-semibold">Fin:</span>
+                                    <span th:if="${registro.fechaFin != null}"
+                                          th:text="${#temporals.format(registro.fechaFin, 'dd/MM/yyyy HH:mm')}"></span>
+                                    <span th:if="${registro.fechaFin == null}">Sin finalizar</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span th:if="${registro.fechaFin == null}" class="badge bg-primary">Abierto</span>
+                                <span th:if="${registro.fechaFin != null}" class="badge bg-secondary">Finalizado</span>
+                            </td>
+                            <td>
+                                <div th:text="${registro.autorAlta}"></div>
+                                <small class="text-muted" th:if="${registro.fechaRegistro != null}"
+                                       th:text="${#temporals.format(registro.fechaRegistro, 'dd/MM/yyyy HH:mm')}"></small>
+                            </td>
+                            <td th:text="${registro.autorFin == null ? '—' : registro.autorFin}"></td>
+                            <td class="text-break"
+                                th:text="${registro.motivoFin == null ? '—' : registro.motivoFin}"></td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
+
             <div class="modal-footer bg-light d-flex justify-content-between">
-                <span class="text-muted small">Historial pendiente de conectar</span>
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar Historial</button>
+                <span class="text-muted small">
+                    Total de nombramientos:
+                    <strong th:text="${#lists.size(historialNombramientos)}">0</strong>
+                </span>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    Cerrar historial
+                </button>
             </div>
         </div>
     </div>
 </div>
+
 
 <!-- Modal: nuevo usuario, pendiente de conectar al backend -->
 <div class="modal fade" id="modalNuevoUsuario" tabindex="-1" aria-labelledby="modalNuevoUsuarioTitulo" aria-hidden="true">
