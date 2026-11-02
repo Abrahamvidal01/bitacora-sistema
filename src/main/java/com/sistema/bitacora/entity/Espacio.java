@@ -28,6 +28,10 @@ public class Espacio {
     @Column(nullable = false)
     private Integer capacidad;
 
+    @Column(name = "minutos_limpieza", nullable = false)
+    private Integer minutosLimpieza = 30;
+
+
     @Column(name = "estado_actual", length = 30)
     private String estadoActual = "DISPONIBLE";
 
