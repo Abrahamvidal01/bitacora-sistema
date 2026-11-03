@@ -87,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
         resultado.hidden = true;
 
         const parametros = new URLSearchParams({
+            espacioId: espacio.value,
             correoSolicitante: correo.value.trim(),
             fechaEvento: fecha.value,
             horaInicio: inicio.value,
@@ -160,3 +161,49 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+// Ejemplo de función en tu JS (ej. reserva-validacion.js) al presionar un botón de "Comprobar Disponibilidad"
+function validarReservaInicial() {
+    // 1. Recolectar los valores de tus inputs en la vista HTML
+    const espacioId = document.getElementById('espacioId').value; // El select o input del espacio
+    const correoSolicitante = document.getElementById('correoSolicitante').value;
+    const fechaEvento = document.getElementById('fechaEvento').value;
+    const horaInicio = document.getElementById('horaInicio').value;
+    const horaFin = document.getElementById('horaFin').value;
+
+    // 2. Empaquetar los datos como URLSearchParams (necesario para form-urlencoded)
+    const formData = new URLSearchParams();
+    formData.append('espacioId', espacioId);
+    formData.append('correoSolicitante', correoSolicitante);
+    formData.append('fechaEvento', fechaEvento);
+    formData.append('horaInicio', horaInicio);
+    formData.append('horaFin', horaFin);
+
+    // 3. Enviar la petición POST al servidor
+    fetch('/admin/reservas/validar-inicial', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData
+    })
+        .then(async response => {
+            const data = await response.json();
+            if (!response.ok) {
+                // Si el servidor regresa 400 Bad Request o 409 Conflict (ej. espacio ocupado o sin 72h)
+                throw new Error(data.mensaje || 'Error en la validación');
+            }
+            return data;
+        })
+        .then(data => {
+            // ¡Éxito! La validación inicial pasó (espacio libre, 72h correctas, nombramiento válido)
+            console.log("Validación superada:", data.mensaje);
+            alert(data.mensaje);
+
+            // Aquí puedes habilitar el siguiente paso de tu interfaz (ej. formulario de recursos)
+        })
+        .catch(error => {
+            // Mostrar el mensaje de error directamente en la vista (ej. un div rojo de alerta)
+            console.error("Error:", error.message);
+            alert("Aviso: " + error.message);
+        });
+}

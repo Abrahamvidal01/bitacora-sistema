@@ -35,6 +35,7 @@ public class ReservaValidacionController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<RespuestaValidacion> comprobar(
+            @RequestParam(name = "espacioId") Long espacioId, // <--- 1. Agregado aquí
             @RequestParam(name = "correoSolicitante", defaultValue = "")
             String correoSolicitante,
             @RequestParam(name = "fechaEvento", defaultValue = "")
@@ -59,17 +60,18 @@ public class ReservaValidacionController {
             );
         }
 
+        // <--- 2. Pasamos espacioId como primer argumento al servicio
         var resultado = validacionService.validarParaAdministrador(
-                correoSolicitante, fecha, inicio, fin
+                espacioId, correoSolicitante, fecha, inicio, fin
         );
 
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noStore())
                 .body(new RespuestaValidacion(
                         true,
-                        "Comprobación inicial superada: titular y anticipación válidos. "
+                        "Comprobación inicial superada: titular, anticipación y disponibilidad de espacio válidos. "
                                 + "No se creó una reserva ni un folio. "
-                                + "Falta comprobar disponibilidad, recursos, documentos y cupos.",
+                                + "Falta comprobar recursos, documentos y cupos.",
                         resultado.inicio().toString(),
                         resultado.fin().toString(),
                         resultado.zonaHoraria()
