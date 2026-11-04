@@ -49,6 +49,13 @@ public class SolicitudEspacio {
     @Column(name = "ruta_oficio_requisicion", length = 255)
     private String rutaOficioRequisicion;
 
+    @Column(name = "ruta_oficio_reservacion", length = 255)
+    private String rutaOficioReservacion;
+
+    @Column(name = "ruta_requisicion", length = 255)
+    private String rutaRequisicion;
+
+
     @Column(name = "es_urgente_sin_oficio")
     private Boolean esUrgenteSinOficio = false;
 
