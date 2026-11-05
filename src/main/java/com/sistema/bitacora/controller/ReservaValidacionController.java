@@ -1,5 +1,6 @@
 package com.sistema.bitacora.controller;
 
+import com.sistema.bitacora.service.ReservaFormularioValidacionService;
 import com.sistema.bitacora.service.ReservaRecursosValidacionService;
 import com.sistema.bitacora.service.ReservaRecursosValidacionService.SolicitudRecurso;
 import com.sistema.bitacora.service.ReservaValidacionService;
@@ -31,12 +32,16 @@ public class ReservaValidacionController {
 
     private final ReservaValidacionService validacionService;
     private final ReservaRecursosValidacionService recursosService;
+    private final ReservaFormularioValidacionService formularioService;
 
     public ReservaValidacionController(
             ReservaValidacionService validacionService,
-            ReservaRecursosValidacionService recursosService) {
+            ReservaRecursosValidacionService recursosService,
+            ReservaFormularioValidacionService formularioService) {
+
         this.validacionService = validacionService;
         this.recursosService = recursosService;
+        this.formularioService = formularioService;
     }
 
     @PostMapping(
@@ -65,13 +70,21 @@ public class ReservaValidacionController {
             inicio = LocalTime.parse(horaInicio.trim());
             fin = LocalTime.parse(horaFin.trim());
         } catch (DateTimeParseException ex) {
-            throw error("Indica una fecha y horas de inicio y fin válidas");
+            throw error(
+                    "Indica una fecha y horas de inicio y fin válidas");
         }
+
+        comprobarMotivo(parametros);
 
         List<SolicitudRecurso> seleccion = leerRecursos(parametros);
 
         var resultado = validacionService.validarParaAdministrador(
-                espacioId, correoSolicitante, fecha, inicio, fin);
+                espacioId,
+                correoSolicitante,
+                fecha,
+                inicio,
+                fin
+        );
 
         var recursos = recursosService.validar(espacioId, seleccion);
 
@@ -79,17 +92,30 @@ public class ReservaValidacionController {
                 .cacheControl(CacheControl.noStore())
                 .body(new RespuestaValidacion(
                         true,
-                        "Comprobación parcial superada: titular, anticipación, "
+                        "Comprobación parcial superada: motivo, titular, anticipación, "
                                 + "disponibilidad del espacio y recursos "
                                 + "seleccionados válidos al consultar. "
                                 + "Registros de inventario comprobados: "
                                 + recursos.size() + ". "
                                 + "No se creó una reserva, apartado ni folio. "
-                                + "Falta comprobar motivo, documentos y cupos.",
+                                + "Falta comprobar documentos y cupos.",
                         resultado.inicio().toString(),
                         resultado.fin().toString(),
                         resultado.zonaHoraria()
                 ));
+    }
+
+    private void comprobarMotivo(
+            MultiValueMap<String, String> parametros) {
+
+        List<String> valores = parametros.get("motivoEvento");
+
+        if (valores == null || valores.size() != 1) {
+            throw error(
+                    "Indica un único motivo o nombre del evento");
+        }
+
+        formularioService.validarMotivo(valores.get(0));
     }
 
     private List<SolicitudRecurso> leerRecursos(
@@ -107,7 +133,8 @@ public class ReservaValidacionController {
             try {
                 id = Long.valueOf(valorId);
             } catch (NumberFormatException ex) {
-                throw error("Los identificadores de artículos deben ser enteros");
+                throw error(
+                        "Los identificadores de artículos deben ser enteros");
             }
 
             String clave = "cantidades[" + id + "]";
@@ -116,7 +143,8 @@ public class ReservaValidacionController {
             List<String> valores = parametros.get(clave);
 
             if (valores == null || valores.size() != 1) {
-                throw error("Indica una sola cantidad para cada artículo seleccionado");
+                throw error(
+                        "Indica una sola cantidad para cada artículo seleccionado");
             }
 
             Integer cantidad;
@@ -124,7 +152,8 @@ public class ReservaValidacionController {
             try {
                 cantidad = Integer.valueOf(valores.get(0));
             } catch (NumberFormatException ex) {
-                throw error("Las cantidades deben ser enteros dentro del rango permitido");
+                throw error(
+                        "Las cantidades deben ser enteros dentro del rango permitido");
             }
 
             seleccion.add(new SolicitudRecurso(id, cantidad));
@@ -133,7 +162,8 @@ public class ReservaValidacionController {
         for (String clave : parametros.keySet()) {
             if (clave.startsWith("cantidades")
                     && !clavesCantidades.contains(clave)) {
-                throw error("Se recibió una cantidad sin un artículo seleccionado válido");
+                throw error(
+                        "Se recibió una cantidad sin un artículo seleccionado válido");
             }
         }
 
@@ -142,7 +172,9 @@ public class ReservaValidacionController {
 
     private ResponseStatusException error(String mensaje) {
         return new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, mensaje);
+                HttpStatus.BAD_REQUEST,
+                mensaje
+        );
     }
 
     @ExceptionHandler(ResponseStatusException.class)

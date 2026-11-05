@@ -1,5 +1,6 @@
 package com.sistema.bitacora.controller;
 
+import com.sistema.bitacora.service.ReservaFormularioValidacionService;
 import com.sistema.bitacora.service.ReservaRecursosValidacionService;
 import com.sistema.bitacora.service.ReservaRecursosValidacionService.RecursoValidado;
 import com.sistema.bitacora.service.ReservaRecursosValidacionService.SolicitudRecurso;
@@ -47,7 +48,10 @@ class ReservaValidacionControllerTest {
         recursos = mock(ReservaRecursosValidacionService.class);
 
         controlador = new ReservaValidacionController(
-                validacion, recursos);
+                validacion,
+                recursos,
+                new ReservaFormularioValidacionService()
+        );
 
         var resultado =
                 new ReservaValidacionService.ResultadoValidacionInicial(
@@ -211,6 +215,36 @@ class ReservaValidacionControllerTest {
         verifyNoInteractions(validacion, recursos);
     }
 
+    @Test
+    void rechazaMotivoAusente() {
+        rechazaMotivo(new LinkedMultiValueMap<>());
+    }
+
+    @Test
+    void rechazaMotivoConSoloEspacios() {
+        var parametros = new LinkedMultiValueMap<String, String>();
+        parametros.add("motivoEvento", "   ");
+
+        rechazaMotivo(parametros);
+    }
+
+    @Test
+    void rechazaMotivoMayorA255Caracteres() {
+        var parametros = new LinkedMultiValueMap<String, String>();
+        parametros.add("motivoEvento", "a".repeat(256));
+
+        rechazaMotivo(parametros);
+    }
+
+    @Test
+    void rechazaDosValoresDeMotivo() {
+        var parametros = new LinkedMultiValueMap<String, String>();
+        parametros.add("motivoEvento", "Primero");
+        parametros.add("motivoEvento", "Segundo");
+
+        rechazaMotivo(parametros);
+    }
+
     private MultiValueMap<String, String> seleccionSimple(
             String id,
             String cantidad) {
@@ -224,6 +258,11 @@ class ReservaValidacionControllerTest {
 
     private ResponseEntity<ReservaValidacionController.RespuestaValidacion>
     comprobar(MultiValueMap<String, String> parametros) {
+
+        // Proporciona un motivo válido a las pruebas anteriores.
+        if (!parametros.containsKey("motivoEvento")) {
+            parametros.add("motivoEvento", "Reunión académica");
+        }
 
         return controlador.comprobar(
                 ESPACIO_ID,
@@ -241,6 +280,26 @@ class ReservaValidacionControllerTest {
         var error = assertThrows(
                 ResponseStatusException.class,
                 () -> comprobar(parametros)
+        );
+
+        assertEquals(400, error.getStatusCode().value());
+        verifyNoInteractions(validacion, recursos);
+    }
+
+    private void rechazaMotivo(
+            MultiValueMap<String, String> parametros) {
+
+        // No usa el auxiliar que agrega un motivo predeterminado.
+        var error = assertThrows(
+                ResponseStatusException.class,
+                () -> controlador.comprobar(
+                        ESPACIO_ID,
+                        CORREO,
+                        FECHA.toString(),
+                        INICIO.toString(),
+                        FIN.toString(),
+                        parametros
+                )
         );
 
         assertEquals(400, error.getStatusCode().value());

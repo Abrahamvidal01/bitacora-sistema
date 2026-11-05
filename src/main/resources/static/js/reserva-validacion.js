@@ -12,14 +12,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const fecha = formulario.querySelector("#reservaDirectaFecha");
     const inicio = formulario.querySelector("#reservaDirectaHoraInicio");
     const fin = formulario.querySelector("#reservaDirectaHoraFin");
+    const motivo = formulario.querySelector("#reservaDirectaMotivo");
 
-    if (!espacio || !correo || !fecha || !inicio || !fin) return;
+    if (!espacio || !correo || !fecha || !inicio || !fin || !motivo) {
+        return;
+    }
 
     let numeroConsulta = 0;
     let solicitudPendiente = null;
     const textoBoton = boton.textContent.trim();
 
-    // La comprobación parcial nunca habilita el guardado.
+    // Superar esta comprobación no habilita el guardado.
     if (confirmar) confirmar.disabled = true;
 
     function mostrarMensaje(texto, tipo = "warning") {
@@ -62,8 +65,8 @@ document.addEventListener("DOMContentLoaded", () => {
     boton.addEventListener("click", async () => {
         if (boton.disabled) return;
 
-        // La comprobación sigue sin exigir motivo ni archivos.
-        for (const campo of [espacio, correo, fecha, inicio, fin]) {
+        // Comprueba campos básicos y motivo, pero todavía no archivos.
+        for (const campo of [espacio, correo, fecha, inicio, fin, motivo]) {
             if (!campo.reportValidity()) return;
         }
 
@@ -125,14 +128,17 @@ document.addEventListener("DOMContentLoaded", () => {
         formulario.setAttribute("aria-busy", "true");
         resultado.hidden = true;
 
+        // Envía los datos básicos y el motivo.
         const parametros = new URLSearchParams({
             espacioId: espacio.value,
             correoSolicitante: correo.value.trim(),
             fechaEvento: fecha.value,
             horaInicio: inicio.value,
-            horaFin: fin.value
+            horaFin: fin.value,
+            motivoEvento: motivo.value.trim()
         });
 
+        // Conserva cada ID real con su cantidad.
         for (const recurso of recursosSeleccionados) {
             parametros.append("articulosIds", recurso.id);
             parametros.append(
