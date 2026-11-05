@@ -125,15 +125,23 @@
                             Estado del artículo
                         </label>
 
-                        <input type="text"
-                               id="estadoBien"
-                               name="estadoBien"
-                               class="form-control"
-                               maxlength="50"
-                               placeholder="Ej. BUENO"
-                               th:value="${estadoForm != null
-                                      ? estadoForm : 'BUENO'}"
-                               required>
+                        <select id="estadoBien"
+                                name="estadoBien"
+                                class="form-select"
+                                required>
+                            <option value="BUENO"
+                                    th:selected="${estadoForm == 'BUENO' || (estadoForm == null && edicionId == null)}">
+                                BUENO
+                            </option>
+                            <option value="REGULAR"
+                                    th:selected="${estadoForm == 'REGULAR'}">
+                                REGULAR
+                            </option>
+                            <option value="MALO"
+                                    th:selected="${estadoForm == 'MALO'}">
+                                MALO
+                            </option>
+                        </select>
                     </div>
 
                     <div class="col-12">

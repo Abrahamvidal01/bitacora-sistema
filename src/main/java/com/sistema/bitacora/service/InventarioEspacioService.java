@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.sistema.bitacora.entity.EstadoBienInventario;
 import java.util.List;
-import java.util.Locale;
 
 @Service
 public class InventarioEspacioService {
@@ -33,6 +33,28 @@ public class InventarioEspacioService {
 
         return inventarioRepository
                 .findByEspacio_IdOrderByNombreItemAsc(espacioId);
+    }
+
+    /**
+     * Lista únicamente los artículos disponibles para reservas (excluyendo el estado MALO).
+     */
+    /**
+     * Consulta existencias en estados permitidos.
+     * No valida una reserva ni comprueba disponibilidad por horario.
+     */
+    @Transactional(readOnly = true)
+    public List<InventarioEspacio> listarDisponiblesParaReserva(
+            Long espacioId) {
+
+        buscarEspacio(espacioId);
+
+        return inventarioRepository.findByEspacio_IdAndEstadoBienIn(
+                espacioId,
+                List.of(
+                        EstadoBienInventario.BUENO.name(),
+                        EstadoBienInventario.REGULAR.name()
+                )
+        );
     }
 
     @Transactional(readOnly = true)
@@ -139,11 +161,12 @@ public class InventarioEspacioService {
             );
         }
 
-        if (estadoBien == null || estadoBien.isBlank()
-                || estadoBien.trim().length() > 50) {
+        try {
+            EstadoBienInventario.desdeTexto(estadoBien);
+        } catch (IllegalArgumentException ex) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "El estado es obligatorio y admite hasta 50 caracteres"
+                    "Selecciona un estado válido: BUENO, REGULAR o MALO"
             );
         }
     }
@@ -165,7 +188,7 @@ public class InventarioEspacioService {
 
         articulo.setCantidad(cantidad);
         articulo.setEstadoBien(
-                estadoBien.trim().toUpperCase(Locale.ROOT)
+                EstadoBienInventario.desdeTexto(estadoBien).name()
         );
     }
 }

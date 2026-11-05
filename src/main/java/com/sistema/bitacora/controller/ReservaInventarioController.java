@@ -1,7 +1,8 @@
 package com.sistema.bitacora.controller;
 
 import com.sistema.bitacora.service.InventarioEspacioService;
-
+import org.springframework.http.CacheControl;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,25 +27,33 @@ public class ReservaInventarioController {
             produces = "application/json"
     )
     @ResponseBody
-    public List<ArticuloRespuesta> listar(
+    public ResponseEntity<List<ArticuloRespuesta>> listar(
             @PathVariable("espacioId") Long espacioId) {
 
-        return inventarioService.listar(espacioId)
+        // Incluye MALO para mostrar el desglose, no para permitir reservarlo.
+        List<ArticuloRespuesta> respuesta = inventarioService
+                .listar(espacioId)
                 .stream()
                 .map(articulo -> new ArticuloRespuesta(
                         articulo.getId(),
                         articulo.getNombreItem(),
                         articulo.getCantidad(),
-                        articulo.getEstadoBien()
+                        articulo.getEstadoBien(),
+                        articulo.getDescripcion()
                 ))
                 .toList();
+
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .body(respuesta);
     }
 
     public record ArticuloRespuesta(
             Long id,
             String nombreItem,
             Integer cantidad,
-            String estadoBien
+            String estadoBien,
+            String descripcion
     ) {
     }
 }

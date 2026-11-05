@@ -17,4 +17,9 @@ public interface InventarioEspacioRepository
             Long id,
             Long espacioId
     );
+
+    List<InventarioEspacio> findByEspacio_IdAndEstadoBienIn(
+            Long espacioId,
+            List<String> estados
+    );
 }
