@@ -224,18 +224,34 @@
         <h5 class="modal-title fw-bold" id="tituloReservaDirecta">
           <i class="bi bi-calendar-event me-2"></i>Registrar Reserva Directa
         </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <button type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+                aria-label="Cerrar">
+        </button>
       </div>
 
       <div class="modal-body p-4">
         <div class="row g-3 mb-3">
           <div class="col-md-6">
             <label for="selectEspacio" class="form-label fw-bold small">Seleccionar Espacio</label>
-            <select class="form-select" id="selectEspacio" name="espacioId" required>
-              <option value="" selected disabled>-- Selecciona un espacio --</option>
-              <option th:each="espacio : ${espacios}" th:if="${espacio.activo == true}"
-                      th:value="${espacio.id}" th:text="${espacio.nombreEspacio + ' - ' + espacio.ubicacion}"
-                      th:attr="data-inventario-url=@{/admin/espacios/{id}/inventario/datos(id=${espacio.id})}"></option>
+            <select class="form-select"
+                    id="selectEspacio"
+                    name="espacioId"
+                    required>
+
+              <option value="" selected disabled>
+                -- Selecciona un espacio --
+              </option>
+
+              <option th:each="espacio : ${espacios}"
+                      th:if="${espacio.activo == true
+                   and espacio.estadoActual == 'DISPONIBLE'}"
+                      th:value="${espacio.id}"
+                      th:text="${espacio.nombreEspacio + ' - ' + espacio.ubicacion}"
+                      th:attr="data-inventario-url=@{/admin/espacios/{id}/inventario/datos(id=${espacio.id})}">
+              </option>
+
             </select>
           </div>
           <div class="col-md-6">
@@ -295,8 +311,12 @@
 
         <div class="mb-3">
           <label for="reservaDirectaOficio" class="form-label fw-bold small">Oficio de reservación</label>
-          <input type="file" id="reservaDirectaOficio" name="oficioReservacion" class="form-control"
-                 accept=".pdf,.png,.jpg,.jpeg" aria-describedby="ayudaOficioReservacion">
+          <input type="file"
+                 id="reservaDirectaOficio"
+                 name="oficioReservacion"
+                 class="form-control"
+                 accept=".pdf,application/pdf"
+                 aria-describedby="ayudaOficioReservacion">
           <div id="ayudaOficioReservacion" class="form-text">
             Obligatorio para toda reserva. Cuando se autorice su entrega posterior por urgencia,
             deberá adjuntarse como máximo cuatro horas después de finalizar el evento.
@@ -305,8 +325,12 @@
 
         <div class="mb-3">
           <label for="reservaDirectaRequisicion" class="form-label fw-bold small">Requisición de recursos externos</label>
-          <input type="file" id="reservaDirectaRequisicion" name="requisicion" class="form-control"
-                 accept=".pdf,.png,.jpg,.jpeg" aria-describedby="ayudaRequisicion">
+          <input type="file"
+                 id="reservaDirectaRequisicion"
+                 name="requisicion"
+                 class="form-control"
+                 accept=".pdf,application/pdf"
+                 aria-describedby="ayudaRequisicion">
           <div id="ayudaRequisicion" class="form-text">
             Obligatoria cuando se soliciten compras o recursos de proveedores externos.
             Cuando se autorice su entrega posterior por urgencia, deberá adjuntarse como máximo
@@ -316,21 +340,41 @@
 
         <div class="alert alert-secondary small mb-0">
           Comprobar datos revisa el motivo, el titular, la anticipación de
-          72 horas, la disponibilidad del espacio con limpieza y las cantidades
-          de los registros de inventario seleccionados.
-          Todavía no valida documentos ni cupos.
-          No crea reservas, apartados ni folios.
-          Los archivos seleccionados no se envían en esta comprobación.
+          72 horas, la disponibilidad del espacio con limpieza, las cantidades
+          de inventario y los PDF que adjuntes.
+          Cada documento se selecciona por separado y admite hasta 3 MB
+          (3,000,000 bytes).
+          Exige oficio de reservación y, si solicitas recursos fuera del inventario,
+          también requisición. Todavía no comprueba cupos ni permite
+          omitir documentos por entrega posterior.
+          No guarda documentos ni crea reservas, apartados o folios.
         </div>
+
         <div id="resultadoValidacionReserva" class="alert alert-info mt-3 mb-0" role="status"
              aria-live="polite" tabindex="-1" hidden></div>
       </div>
 
       <div class="modal-footer bg-light">
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" id="btnComprobarReserva" class="btn btn-outline-primary btn-sm fw-bold">Comprobar datos</button>
-        <button type="button" id="btnConfirmarReserva" class="btn btn-success btn-sm fw-bold"
-                disabled title="El guardado de reservas todavía no está habilitado">Confirmar Reserva</button>
+        <button type="button"
+                id="btnCancelarReserva"
+                class="btn btn-secondary btn-sm"
+                data-bs-dismiss="modal">
+          Cancelar
+        </button>
+
+        <button type="button"
+                id="btnComprobarReserva"
+                class="btn btn-outline-primary btn-sm fw-bold">
+          Comprobar datos
+        </button>
+
+        <button type="button"
+                id="btnConfirmarReserva"
+                class="btn btn-success btn-sm fw-bold"
+                disabled
+                title="El guardado de reservas todavía no está habilitado">
+          Confirmar Reserva
+        </button>
       </div>
     </form>
   </div>

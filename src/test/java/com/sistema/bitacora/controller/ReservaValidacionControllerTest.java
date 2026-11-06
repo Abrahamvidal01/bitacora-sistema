@@ -1,6 +1,7 @@
 package com.sistema.bitacora.controller;
 
 import com.sistema.bitacora.service.ReservaFormularioValidacionService;
+import com.sistema.bitacora.service.ReservaPdfValidacionService;
 import com.sistema.bitacora.service.ReservaRecursosValidacionService;
 import com.sistema.bitacora.service.ReservaRecursosValidacionService.RecursoValidado;
 import com.sistema.bitacora.service.ReservaRecursosValidacionService.SolicitudRecurso;
@@ -9,8 +10,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -18,15 +21,10 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 // Pruebas unitarias: no inicia Spring ni conecta a MySQL.
 // No prueba autenticación, CSRF ni el enlace real de parámetros HTTP.
@@ -40,17 +38,20 @@ class ReservaValidacionControllerTest {
 
     private ReservaValidacionService validacion;
     private ReservaRecursosValidacionService recursos;
+    private ReservaPdfValidacionService pdf;
     private ReservaValidacionController controlador;
 
     @BeforeEach
     void preparar() {
         validacion = mock(ReservaValidacionService.class);
         recursos = mock(ReservaRecursosValidacionService.class);
+        pdf = mock(ReservaPdfValidacionService.class);
 
         controlador = new ReservaValidacionController(
                 validacion,
                 recursos,
-                new ReservaFormularioValidacionService()
+                new ReservaFormularioValidacionService(),
+                pdf
         );
 
         var resultado =
@@ -111,7 +112,6 @@ class ReservaValidacionControllerTest {
     void rechazaArticuloSinCantidad() {
         var parametros = new LinkedMultiValueMap<String, String>();
         parametros.add("articulosIds", "1");
-
         rechazaFormato(parametros);
     }
 
@@ -119,7 +119,6 @@ class ReservaValidacionControllerTest {
     void rechazaCantidadSinArticuloSeleccionado() {
         var parametros = new LinkedMultiValueMap<String, String>();
         parametros.add("cantidades[1]", "3");
-
         rechazaFormato(parametros);
     }
 
@@ -137,7 +136,6 @@ class ReservaValidacionControllerTest {
     void rechazaDosValoresParaLaMismaCantidad() {
         var parametros = seleccionSimple("1", "10");
         parametros.add("cantidades[1]", "20");
-
         rechazaFormato(parametros);
     }
 
@@ -150,7 +148,6 @@ class ReservaValidacionControllerTest {
     void rechazaClaveDeCantidadMalFormada() {
         var parametros = seleccionSimple("1", "1");
         parametros.add("cantidades[abc]", "2");
-
         rechazaFormato(parametros);
     }
 
@@ -167,8 +164,6 @@ class ReservaValidacionControllerTest {
                 () -> comprobar(seleccionSimple("1", "1"))
         );
 
-        assertEquals(409, error.getStatusCode().value());
-
         var respuesta = controlador.manejarError(error);
         var cuerpo = Objects.requireNonNull(respuesta.getBody());
 
@@ -177,6 +172,8 @@ class ReservaValidacionControllerTest {
                 "El artículo está en estado MALO",
                 cuerpo.mensaje()
         );
+
+        verifyNoInteractions(pdf);
     }
 
     @Test
@@ -194,7 +191,7 @@ class ReservaValidacionControllerTest {
         );
 
         assertEquals(409, error.getStatusCode().value());
-        verifyNoInteractions(recursos);
+        verifyNoInteractions(recursos, pdf);
     }
 
     @Test
@@ -207,12 +204,13 @@ class ReservaValidacionControllerTest {
                         "2026-99-99",
                         "09:00",
                         "11:00",
+                        new LinkedMultiValueMap<>(),
                         new LinkedMultiValueMap<>()
                 )
         );
 
         assertEquals(400, error.getStatusCode().value());
-        verifyNoInteractions(validacion, recursos);
+        verifyNoInteractions(validacion, recursos, pdf);
     }
 
     @Test
@@ -224,7 +222,6 @@ class ReservaValidacionControllerTest {
     void rechazaMotivoConSoloEspacios() {
         var parametros = new LinkedMultiValueMap<String, String>();
         parametros.add("motivoEvento", "   ");
-
         rechazaMotivo(parametros);
     }
 
@@ -232,7 +229,6 @@ class ReservaValidacionControllerTest {
     void rechazaMotivoMayorA255Caracteres() {
         var parametros = new LinkedMultiValueMap<String, String>();
         parametros.add("motivoEvento", "a".repeat(256));
-
         rechazaMotivo(parametros);
     }
 
@@ -241,8 +237,183 @@ class ReservaValidacionControllerTest {
         var parametros = new LinkedMultiValueMap<String, String>();
         parametros.add("motivoEvento", "Primero");
         parametros.add("motivoEvento", "Segundo");
-
         rechazaMotivo(parametros);
+    }
+
+    @Test
+    void compruebaLosDosDocumentosPorSeparado() {
+        var oficio = documentoSimulado("oficio.pdf");
+        var requisicion = documentoSimulado("requisicion.pdf");
+
+        var archivos = new LinkedMultiValueMap<String, MultipartFile>();
+        archivos.add("oficioReservacion", oficio);
+        archivos.add("requisicion", requisicion);
+
+        var respuesta = llamar(parametrosValidos(), archivos);
+        var cuerpo = Objects.requireNonNull(respuesta.getBody());
+
+        assertEquals(200, respuesta.getStatusCode().value());
+        assertTrue(cuerpo.mensaje().contains(
+                "PDF adjuntos comprobados: 2"));
+
+        verify(pdf).validar(oficio);
+        verify(pdf).validar(requisicion);
+    }
+
+    @Test
+    void aceptaSoloOficioSinRecursosExternos() {
+        var respuesta = llamar(parametrosValidos(), archivosConOficio());
+        var cuerpo = Objects.requireNonNull(respuesta.getBody());
+
+        assertEquals(200, respuesta.getStatusCode().value());
+        assertTrue(cuerpo.mensaje().contains(
+                "PDF adjuntos comprobados: 1"));
+        assertTrue(cuerpo.mensaje().contains(
+                "No se declararon recursos fuera del inventario"));
+    }
+
+    @Test
+    void conservaElErrorDeTamanoEIdentificaElDocumento() {
+        var oficio = documentoSimulado("oficio.pdf");
+
+        when(pdf.validar(oficio))
+                .thenThrow(new ResponseStatusException(
+                        HttpStatus.CONTENT_TOO_LARGE,
+                        "Cada documento puede pesar como máximo 3 MB"
+                ));
+
+        var archivos = new LinkedMultiValueMap<String, MultipartFile>();
+        archivos.add("oficioReservacion", oficio);
+
+        var error = assertThrows(
+                ResponseStatusException.class,
+                () -> llamar(parametrosValidos(), archivos)
+        );
+
+        assertEquals(413, error.getStatusCode().value());
+        assertTrue(Objects.requireNonNull(error.getReason())
+                .startsWith("Oficio de reservación:"));
+    }
+
+    @Test
+    void rechazaDosArchivosEnElMismoCampo() {
+        var archivos = new LinkedMultiValueMap<String, MultipartFile>();
+        archivos.add("oficioReservacion", documentoSimulado("uno.pdf"));
+        archivos.add("oficioReservacion", documentoSimulado("dos.pdf"));
+
+        var error = assertThrows(
+                ResponseStatusException.class,
+                () -> llamar(parametrosValidos(), archivos)
+        );
+
+        assertEquals(400, error.getStatusCode().value());
+        verifyNoInteractions(pdf);
+    }
+
+    @Test
+    void rechazaUnCampoDeDocumentoDesconocido() {
+        var archivos = new LinkedMultiValueMap<String, MultipartFile>();
+        archivos.add("otroDocumento", documentoSimulado("otro.pdf"));
+
+        var error = assertThrows(
+                ResponseStatusException.class,
+                () -> llamar(parametrosValidos(), archivos)
+        );
+
+        assertEquals(400, error.getStatusCode().value());
+        verifyNoInteractions(pdf);
+    }
+
+    @Test
+    void rechazaLaFaltaDeOficio() {
+        var error = assertThrows(
+                ResponseStatusException.class,
+                () -> llamar(
+                        parametrosValidos(),
+                        new LinkedMultiValueMap<>()
+                )
+        );
+
+        assertEquals(400, error.getStatusCode().value());
+        assertTrue(Objects.requireNonNull(error.getReason())
+                .contains("oficio"));
+    }
+
+    @Test
+    void exigeRequisicionCuandoSeDeclaranRecursosExternos() {
+        var parametros = parametrosValidos();
+        parametros.add("recursosExternos", "Mesas fuera del inventario");
+
+        var error = assertThrows(
+                ResponseStatusException.class,
+                () -> llamar(parametros, archivosConOficio())
+        );
+
+        assertEquals(400, error.getStatusCode().value());
+        assertTrue(Objects.requireNonNull(error.getReason())
+                .contains("requisición"));
+    }
+
+    @Test
+    void informaRevisionDelSupervisorConRecursosExternosYDocumentos() {
+        var parametros = parametrosValidos();
+        parametros.add("recursosExternos", "Servicio externo de sonido");
+
+        var archivos = archivosConOficio();
+        archivos.add(
+                "requisicion",
+                documentoSimulado("requisicion.pdf")
+        );
+
+        var respuesta = llamar(parametros, archivos);
+        var cuerpo = Objects.requireNonNull(respuesta.getBody());
+
+        assertEquals(200, respuesta.getStatusCode().value());
+        assertTrue(cuerpo.mensaje().contains(
+                "requerirá revisión del supervisor"));
+        assertTrue(cuerpo.mensaje().contains(
+                "No se guardaron documentos"));
+    }
+
+    @Test
+    void rechazaDosDescripcionesDeRecursosExternos() {
+        var parametros = parametrosValidos();
+        parametros.add("recursosExternos", "Primera descripción");
+        parametros.add("recursosExternos", "Segunda descripción");
+
+        var error = assertThrows(
+                ResponseStatusException.class,
+                () -> llamar(parametros, archivosConOficio())
+        );
+
+        assertEquals(400, error.getStatusCode().value());
+        verifyNoInteractions(validacion, recursos, pdf);
+    }
+
+    private MockMultipartFile documentoSimulado(String nombre) {
+        // Aquí se prueba la delegación al servicio simulado.
+        // Los PDF reales se prueban en ReservaPdfValidacionServiceTest.
+        return new MockMultipartFile(
+                "documento",
+                nombre,
+                "application/pdf",
+                new byte[]{1, 2, 3}
+        );
+    }
+
+    private MultiValueMap<String, MultipartFile> archivosConOficio() {
+        var archivos = new LinkedMultiValueMap<String, MultipartFile>();
+        archivos.add(
+                "oficioReservacion",
+                documentoSimulado("oficio.pdf")
+        );
+        return archivos;
+    }
+
+    private MultiValueMap<String, String> parametrosValidos() {
+        var parametros = new LinkedMultiValueMap<String, String>();
+        parametros.add("motivoEvento", "Reunión académica");
+        return parametros;
     }
 
     private MultiValueMap<String, String> seleccionSimple(
@@ -252,17 +423,22 @@ class ReservaValidacionControllerTest {
         var parametros = new LinkedMultiValueMap<String, String>();
         parametros.add("articulosIds", id);
         parametros.add("cantidades[" + id + "]", cantidad);
-
         return parametros;
     }
 
     private ResponseEntity<ReservaValidacionController.RespuestaValidacion>
     comprobar(MultiValueMap<String, String> parametros) {
-
-        // Proporciona un motivo válido a las pruebas anteriores.
         if (!parametros.containsKey("motivoEvento")) {
             parametros.add("motivoEvento", "Reunión académica");
         }
+
+        return llamar(parametros, archivosConOficio());
+    }
+
+    private ResponseEntity<ReservaValidacionController.RespuestaValidacion>
+    llamar(
+            MultiValueMap<String, String> parametros,
+            MultiValueMap<String, MultipartFile> archivos) {
 
         return controlador.comprobar(
                 ESPACIO_ID,
@@ -270,7 +446,8 @@ class ReservaValidacionControllerTest {
                 FECHA.toString(),
                 INICIO.toString(),
                 FIN.toString(),
-                parametros
+                parametros,
+                archivos
         );
     }
 
@@ -283,26 +460,18 @@ class ReservaValidacionControllerTest {
         );
 
         assertEquals(400, error.getStatusCode().value());
-        verifyNoInteractions(validacion, recursos);
+        verifyNoInteractions(validacion, recursos, pdf);
     }
 
     private void rechazaMotivo(
             MultiValueMap<String, String> parametros) {
 
-        // No usa el auxiliar que agrega un motivo predeterminado.
         var error = assertThrows(
                 ResponseStatusException.class,
-                () -> controlador.comprobar(
-                        ESPACIO_ID,
-                        CORREO,
-                        FECHA.toString(),
-                        INICIO.toString(),
-                        FIN.toString(),
-                        parametros
-                )
+                () -> llamar(parametros, archivosConOficio())
         );
 
         assertEquals(400, error.getStatusCode().value());
-        verifyNoInteractions(validacion, recursos);
+        verifyNoInteractions(validacion, recursos, pdf);
     }
 }

@@ -9,22 +9,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!selector || !mensaje || !contenedor || !formulario) return;
 
-    // Se conserva mientras el guardado definitivo no esté habilitado.
     formulario.addEventListener("submit", evento => {
         evento.preventDefault();
     });
 
     const estadosPermitidos = new Set(["BUENO", "REGULAR"]);
     const estadosConocidos = new Set(["BUENO", "REGULAR", "MALO"]);
+
     let numeroConsulta = 0;
+    let solicitudPendiente = null;
+
+    function limpiarInventario() {
+        numeroConsulta++;
+        solicitudPendiente?.abort();
+        solicitudPendiente = null;
+
+        contenedor.replaceChildren();
+        contenedor.classList.add("d-none");
+
+        mensaje.textContent =
+            "Selecciona un espacio para consultar su inventario.";
+    }
 
     function elemento(etiqueta, clase = "", texto) {
         const nodo = document.createElement(etiqueta);
         nodo.className = clase;
 
-        if (texto !== undefined) {
-            nodo.textContent = texto;
-        }
+        if (texto !== undefined) nodo.textContent = texto;
 
         return nodo;
     }
@@ -78,10 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function crearFila(articulo, espacioId) {
-        const fila = elemento(
-            "div",
-            "border-top pt-3 mt-3"
-        );
+        const fila = elemento("div", "border-top pt-3 mt-3");
 
         const referencia =
             `${articulo.estado || "SIN ESTADO"} · Registro #${articulo.id}`;
@@ -91,21 +99,17 @@ document.addEventListener("DOMContentLoaded", () => {
             && articulo.cantidad > 0;
 
         if (!reservable) {
-            fila.append(
-                elemento(
-                    "p",
-                    "small fw-semibold text-danger mb-0",
-                    `${referencia}: ${articulo.cantidad} unidades. `
-                    + "No seleccionable."
-                )
-            );
+            fila.append(elemento(
+                "p",
+                "small fw-semibold text-danger mb-0",
+                `${referencia}: ${articulo.cantidad} unidades. `
+                + "No seleccionable."
+            ));
 
             return fila;
         }
 
-        const idBase =
-            `recurso-${espacioId}-${articulo.id}`;
-
+        const idBase = `recurso-${espacioId}-${articulo.id}`;
         const seleccion = elemento("div", "form-check");
 
         const casilla = elemento("input", "form-check-input");
@@ -130,10 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         etiquetaCantidad.htmlFor = `${idBase}-cantidad`;
 
-        const cantidad = elemento(
-            "input",
-            "form-control form-control-sm"
-        );
+        const cantidad = elemento("input", "form-control form-control-sm");
         cantidad.type = "number";
         cantidad.id = `${idBase}-cantidad`;
         cantidad.name = `cantidades[${articulo.id}]`;
@@ -147,9 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
         casilla.addEventListener("change", () => {
             cantidad.disabled = !casilla.checked;
 
-            if (!casilla.checked) {
-                cantidad.value = "1";
-            }
+            if (!casilla.checked) cantidad.value = "1";
         });
 
         fila.append(seleccion, etiquetaCantidad, cantidad);
@@ -194,13 +193,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 articulos.filter(a => a.estado === estado)
             );
 
-            desglose.append(
-                elemento(
-                    "div",
-                    estado === "MALO" ? "text-danger" : "",
-                    `${estado}: ${cantidad}`
-                )
-            );
+            desglose.append(elemento(
+                "div",
+                estado === "MALO" ? "text-danger" : "",
+                `${estado}: ${cantidad}`
+            ));
         }
 
         const desconocidos = articulos.filter(
@@ -208,14 +205,12 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
         if (desconocidos.length > 0) {
-            desglose.append(
-                elemento(
-                    "div",
-                    "text-danger",
-                    `Estado no reconocido: ${sumar(desconocidos)}. `
-                    + "Debe revisarse en inventario."
-                )
-            );
+            desglose.append(elemento(
+                "div",
+                "text-danger",
+                `Estado no reconocido: ${sumar(desconocidos)}. `
+                + "Debe revisarse en inventario."
+            ));
         }
 
         tarjeta.append(desglose);
@@ -229,19 +224,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function cargarInventario() {
-        const consultaActual = ++numeroConsulta;
+        limpiarInventario();
+
         const espacioId = selector.value;
-
-        contenedor.replaceChildren();
-        contenedor.classList.add("d-none");
-
         const url = selector.selectedOptions[0]?.dataset.inventarioUrl;
 
-        if (!espacioId || !url) {
-            mensaje.textContent =
-                "Selecciona un espacio para consultar su inventario.";
-            return;
-        }
+        if (!espacioId || !url) return;
+
+        const consultaActual = numeroConsulta;
+        const controlador = new AbortController();
+        solicitudPendiente = controlador;
 
         mensaje.textContent = "Consultando inventario…";
 
@@ -249,12 +241,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const respuesta = await fetch(url, {
                 credentials: "same-origin",
                 cache: "no-store",
+                signal: controlador.signal,
                 headers: { "Accept": "application/json" }
             });
 
+            if (consultaActual !== numeroConsulta) return;
+
             const tipo = respuesta.headers.get("content-type") || "";
 
-            if (!respuesta.ok || !tipo.includes("application/json")) {
+            if (!respuesta.ok
+                || respuesta.redirected
+                || !tipo.includes("application/json")) {
                 throw new Error("Respuesta de inventario no válida");
             }
 
@@ -270,9 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // Solo agrupa la presentación, nunca los IDs enviados.
-            // Nombre y descripción se comparan exactamente tras quitar
-            // espacios al principio y al final.
+            // Solo agrupa la presentación; conserva cada ID real.
             const grupos = new Map();
 
             for (const articulo of articulos) {
@@ -281,9 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     articulo.descripcion
                 ]);
 
-                if (!grupos.has(clave)) {
-                    grupos.set(clave, []);
-                }
+                if (!grupos.has(clave)) grupos.set(clave, []);
 
                 grupos.get(clave).push(articulo);
             }
@@ -301,23 +294,36 @@ document.addEventListener("DOMContentLoaded", () => {
                 "Selecciona cada registro e indica su cantidad. "
                 + "Las existencias mostradas no constituyen un apartado.";
         } catch (error) {
-            if (consultaActual !== numeroConsulta) return;
+            if (consultaActual !== numeroConsulta
+                || error.name === "AbortError") {
+                return;
+            }
 
             contenedor.replaceChildren();
             contenedor.classList.add("d-none");
+
             mensaje.textContent =
                 "No se pudo cargar un inventario válido. "
                 + "Comprueba tu sesión y revisa sus registros.";
+        } finally {
+            if (consultaActual === numeroConsulta) {
+                solicitudPendiente = null;
+            }
         }
     }
 
     selector.addEventListener("change", cargarInventario);
 
     formulario.addEventListener("reset", () => {
-        queueMicrotask(cargarInventario);
+        limpiarInventario();
+
+        // El evento reset ocurre antes de restaurar los valores.
+        queueMicrotask(() => {
+            if (selector.value) cargarInventario();
+        });
     });
 
-    if (selector.value) {
-        cargarInventario();
-    }
+
+
+    if (selector.value) cargarInventario();
 });

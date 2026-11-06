@@ -1,6 +1,7 @@
 package com.sistema.bitacora.controller;
 
 import com.sistema.bitacora.service.ReservaFormularioValidacionService;
+import com.sistema.bitacora.service.ReservaPdfValidacionService;
 import com.sistema.bitacora.service.ReservaRecursosValidacionService;
 import com.sistema.bitacora.service.ReservaRecursosValidacionService.SolicitudRecurso;
 import com.sistema.bitacora.service.ReservaValidacionService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -30,23 +32,29 @@ import java.util.Set;
 @PreAuthorize("hasRole('ADMINISTRADOR')")
 public class ReservaValidacionController {
 
+    private static final Set<String> DOCUMENTOS_PERMITIDOS =
+            Set.of("oficioReservacion", "requisicion");
+
     private final ReservaValidacionService validacionService;
     private final ReservaRecursosValidacionService recursosService;
     private final ReservaFormularioValidacionService formularioService;
+    private final ReservaPdfValidacionService pdfService;
 
     public ReservaValidacionController(
             ReservaValidacionService validacionService,
             ReservaRecursosValidacionService recursosService,
-            ReservaFormularioValidacionService formularioService) {
+            ReservaFormularioValidacionService formularioService,
+            ReservaPdfValidacionService pdfService) {
 
         this.validacionService = validacionService;
         this.recursosService = recursosService;
         this.formularioService = formularioService;
+        this.pdfService = pdfService;
     }
 
     @PostMapping(
             value = "/validar-inicial",
-            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<RespuestaValidacion> comprobar(
@@ -59,7 +67,8 @@ public class ReservaValidacionController {
             String horaInicio,
             @RequestParam(name = "horaFin", defaultValue = "")
             String horaFin,
-            @RequestParam MultiValueMap<String, String> parametros) {
+            @RequestParam MultiValueMap<String, String> parametros,
+            @RequestParam MultiValueMap<String, MultipartFile> archivos) {
 
         LocalDate fecha;
         LocalTime inicio;
@@ -76,6 +85,7 @@ public class ReservaValidacionController {
 
         comprobarMotivo(parametros);
 
+        String recursosExternos = leerRecursosExternos(parametros);
         List<SolicitudRecurso> seleccion = leerRecursos(parametros);
 
         var resultado = validacionService.validarParaAdministrador(
@@ -88,21 +98,103 @@ public class ReservaValidacionController {
 
         var recursos = recursosService.validar(espacioId, seleccion);
 
+        // Primero comprueba que todos los archivos recibidos sean válidos.
+        int documentosComprobados = comprobarDocumentos(archivos);
+
+        // Estos indicadores se calculan en el servidor, no vienen del navegador.
+        formularioService.validarDocumentosRequeridos(
+                recursosExternos,
+                archivos.containsKey("oficioReservacion"),
+                archivos.containsKey("requisicion")
+        );
+
+        String avisoRevision = recursosExternos.isBlank()
+                ? "No se declararon recursos fuera del inventario. "
+                : "Se declararon recursos fuera del inventario: "
+                + "la reserva requerirá revisión del supervisor. ";
+
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noStore())
                 .body(new RespuestaValidacion(
                         true,
-                        "Comprobación parcial superada: motivo, titular, anticipación, "
-                                + "disponibilidad del espacio y recursos "
-                                + "seleccionados válidos al consultar. "
+                        "Comprobación parcial superada: motivo, titular, "
+                                + "anticipación, disponibilidad del espacio, "
+                                + "recursos seleccionados y documentación "
+                                + "requerida válidos al consultar. "
                                 + "Registros de inventario comprobados: "
                                 + recursos.size() + ". "
-                                + "No se creó una reserva, apartado ni folio. "
-                                + "Falta comprobar documentos y cupos.",
+                                + "PDF adjuntos comprobados: "
+                                + documentosComprobados + ". "
+                                + avisoRevision
+                                + "Falta comprobar los cupos. "
+                                + "Esta comprobación no autoriza una reserva "
+                                + "ni la entrega posterior de documentos. "
+                                + "No se guardaron documentos ni se creó "
+                                + "una reserva, apartado o folio.",
                         resultado.inicio().toString(),
                         resultado.fin().toString(),
                         resultado.zonaHoraria()
                 ));
+    }
+
+    private String leerRecursosExternos(
+            MultiValueMap<String, String> parametros) {
+
+        List<String> valores = parametros.get("recursosExternos");
+
+        if (valores == null) {
+            return "";
+        }
+
+        if (valores.size() != 1 || valores.get(0) == null) {
+            throw error(
+                    "Indica una sola descripción de recursos externos");
+        }
+
+        return valores.get(0).strip();
+    }
+
+    private int comprobarDocumentos(
+            MultiValueMap<String, MultipartFile> archivos) {
+
+        int comprobados = 0;
+
+        for (var entrada : archivos.entrySet()) {
+            String nombreCampo = entrada.getKey();
+
+            if (!DOCUMENTOS_PERMITIDOS.contains(nombreCampo)) {
+                throw error(
+                        "Se recibió un campo de documento no permitido");
+            }
+
+            List<MultipartFile> documentos = entrada.getValue();
+
+            if (documentos == null || documentos.size() != 1) {
+                throw error(
+                        "Adjunta un solo PDF en cada campo de documento");
+            }
+
+            try {
+                pdfService.validar(documentos.get(0));
+            } catch (ResponseStatusException ex) {
+                String etiqueta = nombreCampo.equals("oficioReservacion")
+                        ? "Oficio de reservación"
+                        : "Requisición";
+
+                String detalle = ex.getReason() == null
+                        ? "No se pudo comprobar el PDF"
+                        : ex.getReason();
+
+                throw new ResponseStatusException(
+                        ex.getStatusCode(),
+                        etiqueta + ": " + detalle
+                );
+            }
+
+            comprobados++;
+        }
+
+        return comprobados;
     }
 
     private void comprobarMotivo(
