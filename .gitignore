@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Documentos locales: nunca subirlos al repositorio
+/documentos-privados/
+/uploads/

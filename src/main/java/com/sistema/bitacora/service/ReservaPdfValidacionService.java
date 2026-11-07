@@ -17,7 +17,12 @@ public class ReservaPdfValidacionService {
 
     public static final int MAX_BYTES = 3_000_000;
 
+    // Mantiene la compatibilidad con la comprobación del formulario.
     public ResultadoPdf validar(MultipartFile archivo) {
+        return validarParaGuardar(archivo).resultado();
+    }
+
+    public PdfValidado validarParaGuardar(MultipartFile archivo) {
         if (archivo == null || archivo.isEmpty()) {
             throw error(
                     HttpStatus.BAD_REQUEST,
@@ -44,14 +49,14 @@ public class ReservaPdfValidacionService {
 
         byte[] contenido;
 
+        // Lee el archivo una sola vez, con un límite.
         try (InputStream entrada = archivo.getInputStream()) {
-            // Lee como máximo el límite más un byte.
-            // Comprueba también el tamaño real del contenido leído.
             contenido = entrada.readNBytes(MAX_BYTES + 1);
         } catch (IOException ex) {
             throw error(
                     HttpStatus.BAD_REQUEST,
-                    "No se pudo leer el documento. Intenta seleccionarlo otra vez"
+                    "No se pudo leer el documento. "
+                            + "Intenta seleccionarlo otra vez"
             );
         }
 
@@ -69,6 +74,8 @@ public class ReservaPdfValidacionService {
             );
         }
 
+        ResultadoPdf resultado;
+
         try (PDDocument documento = Loader.loadPDF(contenido)) {
             int paginas = documento.getNumberOfPages();
 
@@ -79,7 +86,7 @@ public class ReservaPdfValidacionService {
                 );
             }
 
-            return new ResultadoPdf(contenido.length, paginas);
+            resultado = new ResultadoPdf(contenido.length, paginas);
 
         } catch (InvalidPasswordException ex) {
             throw error(
@@ -94,6 +101,8 @@ public class ReservaPdfValidacionService {
                             + "Comprueba que el archivo no esté dañado"
             );
         }
+
+        return new PdfValidado(contenido, resultado);
     }
 
     private boolean tieneCabeceraPdf(byte[] contenido) {
@@ -114,5 +123,30 @@ public class ReservaPdfValidacionService {
     public record ResultadoPdf(
             int tamanioBytes,
             int paginas) {
+    }
+
+    /**
+     * Solo el validador puede construir esta instancia.
+     * No expone el arreglo interno para que otros puedan modificarlo.
+     */
+    public static final class PdfValidado {
+
+        private final byte[] contenido;
+        private final ResultadoPdf resultado;
+
+        private PdfValidado(
+                byte[] contenido,
+                ResultadoPdf resultado) {
+            this.contenido = contenido;
+            this.resultado = resultado;
+        }
+
+        public ResultadoPdf resultado() {
+            return resultado;
+        }
+
+        public byte[] copiarContenido() {
+            return contenido.clone();
+        }
     }
 }
