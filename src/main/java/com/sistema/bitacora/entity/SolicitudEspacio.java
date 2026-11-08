@@ -27,6 +27,34 @@ public class SolicitudEspacio {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
+    // Departamento que realizó esta solicitud.
+    // No se obtiene posteriormente del departamento actual del usuario.
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "departamento_solicitante_id",
+            nullable = false,
+            updatable = false
+    )
+    private Departamento departamentoSolicitante;
+
+    // Nombramiento utilizado al registrar esta solicitud.
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "nombramiento_id",
+            nullable = false,
+            updatable = false
+    )
+    private NombramientoDepartamento nombramiento;
+
+    // Cuenta que realizó la captura: administrador o solicitante.
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "registrado_por_usuario_id",
+            nullable = false,
+            updatable = false
+    )
+    private Usuario registradoPor;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "espacio_id", nullable = false)
     private Espacio espacio;
@@ -54,7 +82,6 @@ public class SolicitudEspacio {
 
     @Column(name = "ruta_requisicion", length = 255)
     private String rutaRequisicion;
-
 
     @Column(name = "es_urgente_sin_oficio")
     private Boolean esUrgenteSinOficio = false;

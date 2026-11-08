@@ -1,5 +1,6 @@
 package com.sistema.bitacora.controller;
 
+import com.sistema.bitacora.service.ReservaCupoValidacionService;
 import com.sistema.bitacora.service.ReservaFormularioValidacionService;
 import com.sistema.bitacora.service.ReservaPdfValidacionService;
 import com.sistema.bitacora.service.ReservaRecursosValidacionService;
@@ -22,8 +23,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 // Pruebas unitarias: no inicia Spring ni conecta a MySQL.
@@ -31,6 +31,7 @@ import static org.mockito.Mockito.*;
 class ReservaValidacionControllerTest {
 
     private static final Long ESPACIO_ID = 2L;
+    private static final Long DEPARTAMENTO_ID = 1L;
     private static final String CORREO = "titular@ejemplo.test";
     private static final LocalDate FECHA = LocalDate.of(2026, 11, 10);
     private static final LocalTime INICIO = LocalTime.of(9, 0);
@@ -39,6 +40,7 @@ class ReservaValidacionControllerTest {
     private ReservaValidacionService validacion;
     private ReservaRecursosValidacionService recursos;
     private ReservaPdfValidacionService pdf;
+    private ReservaCupoValidacionService cupos;
     private ReservaValidacionController controlador;
 
     @BeforeEach
@@ -46,28 +48,33 @@ class ReservaValidacionControllerTest {
         validacion = mock(ReservaValidacionService.class);
         recursos = mock(ReservaRecursosValidacionService.class);
         pdf = mock(ReservaPdfValidacionService.class);
+        cupos = mock(ReservaCupoValidacionService.class);
 
         controlador = new ReservaValidacionController(
                 validacion,
                 recursos,
                 new ReservaFormularioValidacionService(),
-                pdf
+                pdf,
+                cupos
         );
-
-        var resultado =
-                new ReservaValidacionService.ResultadoValidacionInicial(
-                        1L, 2L, 1L, 3L,
-                        FECHA.atTime(INICIO),
-                        FECHA.atTime(FIN),
-                        "America/Mexico_City"
-                );
 
         when(validacion.validarParaAdministrador(
                 ESPACIO_ID, CORREO, FECHA, INICIO, FIN))
-                .thenReturn(resultado);
+                .thenReturn(resultadoInicial(FECHA));
 
         when(recursos.validar(eq(ESPACIO_ID), anyList()))
                 .thenReturn(List.of());
+
+        when(cupos.validar(anyLong(), any(LocalDate.class)))
+                .thenReturn(
+                        new ReservaCupoValidacionService.ResultadoCupo(
+                                DEPARTAMENTO_ID,
+                                "2026-11",
+                                1,
+                                0L,
+                                1L
+                        )
+                );
     }
 
     @Test
@@ -173,7 +180,7 @@ class ReservaValidacionControllerTest {
                 cuerpo.mensaje()
         );
 
-        verifyNoInteractions(pdf);
+        verifyNoInteractions(pdf, cupos);
     }
 
     @Test
@@ -191,7 +198,7 @@ class ReservaValidacionControllerTest {
         );
 
         assertEquals(409, error.getStatusCode().value());
-        verifyNoInteractions(recursos, pdf);
+        verifyNoInteractions(recursos, pdf, cupos);
     }
 
     @Test
@@ -210,7 +217,7 @@ class ReservaValidacionControllerTest {
         );
 
         assertEquals(400, error.getStatusCode().value());
-        verifyNoInteractions(validacion, recursos, pdf);
+        verifyNoInteractions(validacion, recursos, pdf, cupos);
     }
 
     @Test
@@ -293,6 +300,8 @@ class ReservaValidacionControllerTest {
         assertEquals(413, error.getStatusCode().value());
         assertTrue(Objects.requireNonNull(error.getReason())
                 .startsWith("Oficio de reservación:"));
+
+        verifyNoInteractions(cupos);
     }
 
     @Test
@@ -307,7 +316,7 @@ class ReservaValidacionControllerTest {
         );
 
         assertEquals(400, error.getStatusCode().value());
-        verifyNoInteractions(pdf);
+        verifyNoInteractions(pdf, cupos);
     }
 
     @Test
@@ -321,7 +330,7 @@ class ReservaValidacionControllerTest {
         );
 
         assertEquals(400, error.getStatusCode().value());
-        verifyNoInteractions(pdf);
+        verifyNoInteractions(pdf, cupos);
     }
 
     @Test
@@ -337,6 +346,8 @@ class ReservaValidacionControllerTest {
         assertEquals(400, error.getStatusCode().value());
         assertTrue(Objects.requireNonNull(error.getReason())
                 .contains("oficio"));
+
+        verifyNoInteractions(cupos);
     }
 
     @Test
@@ -352,6 +363,8 @@ class ReservaValidacionControllerTest {
         assertEquals(400, error.getStatusCode().value());
         assertTrue(Objects.requireNonNull(error.getReason())
                 .contains("requisición"));
+
+        verifyNoInteractions(cupos);
     }
 
     @Test
@@ -387,7 +400,105 @@ class ReservaValidacionControllerTest {
         );
 
         assertEquals(400, error.getStatusCode().value());
-        verifyNoInteractions(validacion, recursos, pdf);
+        verifyNoInteractions(validacion, recursos, pdf, cupos);
+    }
+
+    @Test
+    void consultaElDepartamentoValidadoNoElEnviadoPorElCliente() {
+        var parametros = parametrosValidos();
+        parametros.add("departamentoId", "999");
+        parametros.add("cupoMensual", "999");
+
+        var respuesta = llamar(parametros, archivosConOficio());
+
+        assertEquals(200, respuesta.getStatusCode().value());
+
+        verify(cupos).validar(DEPARTAMENTO_ID, FECHA);
+        verify(cupos, never()).validar(eq(999L), any(LocalDate.class));
+    }
+
+    @Test
+    void conservaElErrorCuandoElCupoEstaAgotado() {
+        when(cupos.validar(DEPARTAMENTO_ID, FECHA))
+                .thenThrow(new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "El departamento agotó su cupo mensual"
+                ));
+
+        var error = assertThrows(
+                ResponseStatusException.class,
+                () -> llamar(parametrosValidos(), archivosConOficio())
+        );
+
+        var respuesta = controlador.manejarError(error);
+        var cuerpo = Objects.requireNonNull(respuesta.getBody());
+
+        assertEquals(409, respuesta.getStatusCode().value());
+        assertEquals(
+                "El departamento agotó su cupo mensual",
+                cuerpo.mensaje()
+        );
+    }
+
+    @Test
+    void muestraConsumosLimiteYDisponibilidadConsultados() {
+        when(cupos.validar(DEPARTAMENTO_ID, FECHA))
+                .thenReturn(
+                        new ReservaCupoValidacionService.ResultadoCupo(
+                                DEPARTAMENTO_ID,
+                                "2026-11",
+                                4,
+                                3L,
+                                1L
+                        )
+                );
+
+        var respuesta = llamar(parametrosValidos(), archivosConOficio());
+        var cuerpo = Objects.requireNonNull(respuesta.getBody());
+
+        assertTrue(cuerpo.mensaje().contains(
+                "Cupo mensual consultado para 2026-11"));
+        assertTrue(cuerpo.mensaje().contains(
+                "3 consumido(s) de 4"));
+        assertTrue(cuerpo.mensaje().contains(
+                "disponibles al consultar: 1"));
+        assertTrue(cuerpo.mensaje().contains(
+                "Esta comprobación no consume cupos"));
+    }
+
+    @Test
+    void consultaLaFechaDevueltaPorLaValidacionDelServidor() {
+        LocalDate otraFecha = LocalDate.of(2027, 1, 10);
+
+        when(validacion.validarParaAdministrador(
+                ESPACIO_ID, CORREO, FECHA, INICIO, FIN))
+                .thenReturn(resultadoInicial(otraFecha));
+
+        when(cupos.validar(DEPARTAMENTO_ID, otraFecha))
+                .thenReturn(
+                        new ReservaCupoValidacionService.ResultadoCupo(
+                                DEPARTAMENTO_ID,
+                                "2027-01",
+                                1,
+                                0L,
+                                1L
+                        )
+                );
+
+        llamar(parametrosValidos(), archivosConOficio());
+
+        verify(cupos).validar(DEPARTAMENTO_ID, otraFecha);
+        verify(cupos, never()).validar(DEPARTAMENTO_ID, FECHA);
+    }
+
+    private ReservaValidacionService.ResultadoValidacionInicial
+    resultadoInicial(LocalDate fecha) {
+        return new ReservaValidacionService.ResultadoValidacionInicial(
+                1L, 2L, DEPARTAMENTO_ID, 3L,
+                fecha.atTime(INICIO),
+                fecha.atTime(FIN),
+                "America/Mexico_City"
+        );
     }
 
     private MockMultipartFile documentoSimulado(String nombre) {
@@ -419,7 +530,6 @@ class ReservaValidacionControllerTest {
     private MultiValueMap<String, String> seleccionSimple(
             String id,
             String cantidad) {
-
         var parametros = new LinkedMultiValueMap<String, String>();
         parametros.add("articulosIds", id);
         parametros.add("cantidades[" + id + "]", cantidad);
@@ -439,7 +549,6 @@ class ReservaValidacionControllerTest {
     llamar(
             MultiValueMap<String, String> parametros,
             MultiValueMap<String, MultipartFile> archivos) {
-
         return controlador.comprobar(
                 ESPACIO_ID,
                 CORREO,
@@ -453,25 +562,23 @@ class ReservaValidacionControllerTest {
 
     private void rechazaFormato(
             MultiValueMap<String, String> parametros) {
-
         var error = assertThrows(
                 ResponseStatusException.class,
                 () -> comprobar(parametros)
         );
 
         assertEquals(400, error.getStatusCode().value());
-        verifyNoInteractions(validacion, recursos, pdf);
+        verifyNoInteractions(validacion, recursos, pdf, cupos);
     }
 
     private void rechazaMotivo(
             MultiValueMap<String, String> parametros) {
-
         var error = assertThrows(
                 ResponseStatusException.class,
                 () -> llamar(parametros, archivosConOficio())
         );
 
         assertEquals(400, error.getStatusCode().value());
-        verifyNoInteractions(validacion, recursos, pdf);
+        verifyNoInteractions(validacion, recursos, pdf, cupos);
     }
 }

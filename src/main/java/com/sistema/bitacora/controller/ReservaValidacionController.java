@@ -1,5 +1,6 @@
 package com.sistema.bitacora.controller;
 
+import com.sistema.bitacora.service.ReservaCupoValidacionService;
 import com.sistema.bitacora.service.ReservaFormularioValidacionService;
 import com.sistema.bitacora.service.ReservaPdfValidacionService;
 import com.sistema.bitacora.service.ReservaRecursosValidacionService;
@@ -39,17 +40,20 @@ public class ReservaValidacionController {
     private final ReservaRecursosValidacionService recursosService;
     private final ReservaFormularioValidacionService formularioService;
     private final ReservaPdfValidacionService pdfService;
+    private final ReservaCupoValidacionService cupoService;
 
     public ReservaValidacionController(
             ReservaValidacionService validacionService,
             ReservaRecursosValidacionService recursosService,
             ReservaFormularioValidacionService formularioService,
-            ReservaPdfValidacionService pdfService) {
+            ReservaPdfValidacionService pdfService,
+            ReservaCupoValidacionService cupoService) {
 
         this.validacionService = validacionService;
         this.recursosService = recursosService;
         this.formularioService = formularioService;
         this.pdfService = pdfService;
+        this.cupoService = cupoService;
     }
 
     @PostMapping(
@@ -98,14 +102,19 @@ public class ReservaValidacionController {
 
         var recursos = recursosService.validar(espacioId, seleccion);
 
-        // Primero comprueba que todos los archivos recibidos sean válidos.
         int documentosComprobados = comprobarDocumentos(archivos);
 
-        // Estos indicadores se calculan en el servidor, no vienen del navegador.
         formularioService.validarDocumentosRequeridos(
                 recursosExternos,
                 archivos.containsKey("oficioReservacion"),
                 archivos.containsKey("requisicion")
+        );
+
+        // Usa el departamento y la fecha ya validados por el servidor.
+        // No recibe el departamento ni el límite desde el navegador.
+        var cupo = cupoService.validar(
+                resultado.departamentoId(),
+                resultado.inicio().toLocalDate()
         );
 
         String avisoRevision = recursosExternos.isBlank()
@@ -113,22 +122,30 @@ public class ReservaValidacionController {
                 : "Se declararon recursos fuera del inventario: "
                 + "la reserva requerirá revisión del supervisor. ";
 
+        String avisoCupo =
+                "Cupo mensual consultado para " + cupo.mesEvento()
+                        + ": " + cupo.consumidos()
+                        + " consumido(s) de " + cupo.cupoMensual()
+                        + "; disponibles al consultar: "
+                        + cupo.disponibles() + ". ";
+
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noStore())
                 .body(new RespuestaValidacion(
                         true,
                         "Comprobación parcial superada: motivo, titular, "
                                 + "anticipación, disponibilidad del espacio, "
-                                + "recursos seleccionados y documentación "
-                                + "requerida válidos al consultar. "
+                                + "recursos seleccionados, documentación "
+                                + "requerida y cupo mensual válidos al consultar. "
                                 + "Registros de inventario comprobados: "
                                 + recursos.size() + ". "
                                 + "PDF adjuntos comprobados: "
                                 + documentosComprobados + ". "
                                 + avisoRevision
-                                + "Falta comprobar los cupos. "
-                                + "Esta comprobación no autoriza una reserva "
-                                + "ni la entrega posterior de documentos. "
+                                + avisoCupo
+                                + "Esta comprobación no consume cupos, "
+                                + "no garantiza disponibilidad al confirmar "
+                                + "ni autoriza la entrega posterior de documentos. "
                                 + "No se guardaron documentos ni se creó "
                                 + "una reserva, apartado o folio.",
                         resultado.inicio().toString(),
