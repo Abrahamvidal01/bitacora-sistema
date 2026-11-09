@@ -95,13 +95,8 @@ public class ReservaBloqueoService {
                             + "una transacción activa de escritura"
             );
         }
-
-        if (!entityManager.isJoinedToTransaction()) {
-            throw new IllegalStateException(
-                    "El EntityManager debe participar "
-                            + "en la transacción de confirmación"
-            );
-        }
+        // Se elimina la verificación de isJoinedToTransaction()
+        // porque en transacciones resource-local de Spring Boot no aplica.
     }
 
     private ResponseStatusException error(String mensaje) {

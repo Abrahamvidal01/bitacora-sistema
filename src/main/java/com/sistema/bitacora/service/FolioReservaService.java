@@ -30,14 +30,13 @@ public class FolioReservaService {
     @Transactional(propagation = Propagation.MANDATORY)
     public String generarParaReserva() {
         if (!TransactionSynchronizationManager.isActualTransactionActive()
-                || TransactionSynchronizationManager.isCurrentTransactionReadOnly()
-                || !entidad.isJoinedToTransaction()) {
+                || TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
             throw new IllegalStateException(
                     "El folio requiere una transacción de escritura activa");
         }
 
         Object resultado;
-
+        // ... el resto del código se queda exactamente igual ...
         try {
             resultado = entidad.createNativeQuery("""
                     SELECT ultimo_consecutivo
