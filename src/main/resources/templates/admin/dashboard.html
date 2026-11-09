@@ -232,6 +232,29 @@
       </div>
 
       <div class="modal-body p-4">
+        <div class="border rounded p-3 mb-3">
+          <div class="form-check">
+            <input type="checkbox" id="reservaDirectaUrgencia" name="esUrgencia" value="true"
+                   class="form-check-input" aria-describedby="ayudaUrgenciaAdministrativa">
+            <label for="reservaDirectaUrgencia" class="form-check-label fw-bold small">Atender como urgencia administrativa</label>
+          </div>
+          <div id="ayudaUrgenciaAdministrativa" class="form-text">
+            Reserva normal: mínimo 72 horas de anticipación. Urgencia con recursos únicamente
+            del inventario escolar: mínimo 24 horas. Los recursos fuera del inventario escolar
+            o una requisición mantienen el mínimo de 72 horas y requieren revisión del supervisor.
+          </div>
+          <div id="bloqueMotivoUrgencia" class="mt-3" hidden>
+            <label for="reservaDirectaMotivoUrgencia" class="form-label fw-bold small">Motivo de la urgencia administrativa</label>
+            <textarea id="reservaDirectaMotivoUrgencia" name="motivoUrgencia" class="form-control"
+                      maxlength="255" rows="2" aria-describedby="ayudaMotivoUrgencia" disabled></textarea>
+            <div id="ayudaMotivoUrgencia" class="form-text">
+              Explica la razón de la urgencia; por ejemplo, falta de acceso al sistema u olvido de registrar la solicitud.
+            </div>
+          </div>
+        </div>
+        <div id="avisoModalidadReserva" class="alert alert-info mb-3" role="status" aria-live="polite">
+          Reserva normal: se requieren al menos 72 horas de anticipación.
+        </div>
         <div class="row g-3 mb-3">
           <div class="col-md-6">
             <label for="selectEspacio" class="form-label fw-bold small">Seleccionar Espacio</label>
@@ -303,9 +326,9 @@
             Describe los recursos adicionales y sus cantidades. Deja este campo vacío si no los necesitas.
           </div>
           <div id="avisoRecursosExternos" class="alert alert-warning mt-3 mb-0" role="status" aria-live="polite" hidden>
-            Estás solicitando recursos que no pertenecen al inventario de este espacio.
-            Su solicitud no garantiza disponibilidad. Requieren revisión del supervisor;
-            esta comprobación inicial no procesa documentos ni autoriza recursos.
+            Estás solicitando recursos que no pertenecen al inventario escolar.
+            Su solicitud no garantiza disponibilidad y requiere revisión del supervisor.
+            Esta comprobación inicial valida los PDF, pero no aprueba solicitudes ni guarda documentos.
           </div>
         </div>
 
@@ -318,8 +341,9 @@
                  accept=".pdf,application/pdf"
                  aria-describedby="ayudaOficioReservacion">
           <div id="ayudaOficioReservacion" class="form-text">
-            Obligatorio para toda reserva. Cuando se autorice su entrega posterior por urgencia,
-            deberá adjuntarse como máximo cuatro horas después de finalizar el evento.
+            Obligatorio en todas las modalidades, incluida la urgencia administrativa.
+            Debe ser un PDF de hasta 3 MB (3,000,000 bytes).
+            La entrega posterior no está habilitada en esta comprobación inicial.
           </div>
         </div>
 
@@ -332,23 +356,27 @@
                  accept=".pdf,application/pdf"
                  aria-describedby="ayudaRequisicion">
           <div id="ayudaRequisicion" class="form-text">
-            Obligatoria cuando se soliciten compras o recursos de proveedores externos.
-            Cuando se autorice su entrega posterior por urgencia, deberá adjuntarse como máximo
-            cuatro horas después de finalizar el evento.
+            Obligatoria cuando se soliciten recursos fuera del inventario escolar, tengan o no costo.
+            Debe adjuntarse la requisición real en PDF de hasta 3 MB (3,000,000 bytes),
+            cuyo contenido será revisado por el supervisor.
+            La entrega posterior no está habilitada en esta comprobación inicial.
           </div>
         </div>
 
         <div class="alert alert-secondary small mb-0">
-          Comprobar datos revisa el motivo, el titular, la anticipación de
-          72 horas, la disponibilidad del espacio con limpieza, las cantidades
+          Comprobar datos revisa el motivo, el titular y la anticipación:
+          mínimo 72 horas en modalidad normal y mínimo 24 horas en urgencia administrativa
+          con recursos únicamente del inventario escolar. Si hay recursos fuera del inventario
+          escolar o una requisición, se mantiene el mínimo de 72 horas y se requiere revisión
+          del supervisor. También revisa la disponibilidad del espacio con limpieza, las cantidades
           de inventario, los documentos requeridos y el cupo mensual del
           departamento para el mes del evento.
           Cada PDF admite hasta 3 MB (3,000,000 bytes).
-          Exige oficio de reservación y, si solicitas recursos fuera del
-          inventario, también requisición.
+          Exige oficio de reservación en todas las modalidades y, si solicitas recursos fuera del
+          inventario escolar, también requisición, independientemente de su costo.
           Esta comprobación no consume cupos ni permite omitir documentos
           por entrega posterior.
-          No guarda documentos ni crea reservas, apartados o folios.
+          No aprueba solicitudes, no guarda documentos ni crea reservas, apartados o folios.
         </div>
 
         <div id="resultadoValidacionReserva" class="alert alert-info mt-3 mb-0" role="status"
