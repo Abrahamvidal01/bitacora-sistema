@@ -35,3 +35,6 @@ build/
 # Documentos locales: nunca subirlos al repositorio
 /documentos-privados/
 /uploads/
+
+# Respaldo local: no publicar datos
+/respaldo_bitacora_espacios.sql
