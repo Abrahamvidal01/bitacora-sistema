@@ -16,9 +16,11 @@
             <i class="bi bi-calendar-event me-2"></i> Reservas de Espacios
         </span>
         <div class="d-flex align-items-center gap-3">
-            <span class="text-white small">
-                <i class="bi bi-person-circle me-1"></i> Usuario Docente (Sistemas)
-            </span>
+            <!-- IDENTIDAD ACTUAL DEL PANEL v1 -->
+<span class="text-white small text-end" style="max-width: 20rem;">
+    <span class="d-block fw-semibold text-break" th:text="${nombreUsuarioActual}">Usuario</span>
+    <span class="d-block opacity-75" th:text="${rolUsuarioActual}">Rol</span>
+</span>
             <div class="d-flex gap-2">
                 <a th:href="@{${regresoUrl}}" class="btn btn-outline-light btn-sm">
                     <i class="bi bi-arrow-left"></i>

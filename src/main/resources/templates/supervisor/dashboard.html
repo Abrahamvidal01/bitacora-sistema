@@ -16,9 +16,11 @@
             <i class="bi bi-clipboard-check me-2"></i> Control de Supervisor
         </span>
         <div class="d-flex align-items-center gap-3">
-            <span class="text-white small">
-                <i class="bi bi-person-badge me-1"></i> Supervisor Activo
-            </span>
+            <!-- IDENTIDAD ACTUAL DEL PANEL v1 -->
+<span class="text-white small text-end" style="max-width: 20rem;">
+    <span class="d-block fw-semibold text-break" th:text="${nombreUsuarioActual}">Usuario</span>
+    <span class="d-block opacity-75" th:text="${rolUsuarioActual}">Rol</span>
+</span>
             <div class="d-flex gap-2">
                 <a th:href="@{${regresoUrl}}" class="btn btn-outline-light btn-sm">
                     <i class="bi bi-arrow-left"></i>

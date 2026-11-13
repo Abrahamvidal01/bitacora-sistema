@@ -21,7 +21,11 @@
   <div class="container-fluid px-4">
     <a class="navbar-brand fw-bold" href="#"><i class="bi bi-shield-lock-fill me-2"></i>Panel Administrador</a>
     <div class="d-flex align-items-center gap-3">
-      <span class="text-white small"><i class="bi bi-person-circle me-1"></i> Admin General</span>
+      <!-- IDENTIDAD ACTUAL DEL PANEL v1 -->
+<span class="text-white small text-end" style="max-width: 20rem;">
+    <span class="d-block fw-semibold text-break" th:text="${nombreUsuarioActual}">Usuario</span>
+    <span class="d-block opacity-75" th:text="${rolUsuarioActual}">Rol</span>
+</span>
       <div class="d-flex gap-2">
         <a th:href="@{${regresoUrl}}" class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-left"></i> <span th:text="${regresoTexto}">Volver</span></a>
         <form th:action="@{/logout}" method="post" class="m-0"><button type="submit" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</button></form>
@@ -129,6 +133,12 @@
   <div class="modal-header bg-warning text-dark"><h5 class="modal-title fw-bold" id="tituloHistorialAdmin"><i class="bi bi-clock-history me-2"></i>Historial de reservas urgentes</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
   <div class="modal-body">
     <div class="row g-3 align-items-end mb-3"><div class="col-md-4"><label for="mesHistorialAdmin" class="form-label fw-bold">Mes del evento</label><input type="month" id="mesHistorialAdmin" class="form-control" min="1900-01" max="2200-12"></div><div class="col-md-8"><p class="small text-muted mb-0">Urgencias administrativas de 24 y 72 horas registradas por los administradores. Incluye sus distintos estados. Las solicitudes normales no forman parte de este historial.</p></div></div>
+        <!-- REPORTES ADMIN PDF XLSX v1 -->
+    <div id="descargasHistorialAdmin" class="d-flex flex-wrap gap-2 mb-2" th:attr="data-url=@{/admin/dashboard/historial/reporte}">
+      <button type="button" class="btn btn-outline-danger btn-sm" data-formato="pdf">Descargar PDF</button>
+      <button type="button" class="btn btn-outline-success btn-sm" data-formato="xlsx">Descargar Excel</button>
+    </div>
+    <p id="estadoDescargaHistorialAdmin" class="small text-muted" role="status" aria-live="polite">El reporte incluye todas las paginas del mes seleccionado, con sus estados. Maximo 2000 reservas; no se recortan resultados.</p>
     <p id="estadoHistorialAdmin" class="small mb-3" role="status" aria-live="polite">Selecciona un mes para consultar.</p>
     <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Folio</th><th>Solicitante / Departamento</th><th>Espacio</th><th>Fecha del evento</th><th>Horario</th><th>Registro</th><th>Estado</th></tr></thead><tbody id="cuerpoHistorialAdmin"><tr><td colspan="7" class="text-center text-muted py-4">El historial todavía no se ha consultado.</td></tr></tbody></table></div>
   </div>
@@ -178,5 +188,6 @@
   </div></div>
 </div>
 <script th:src="@{/js/espacio-eliminar.js}"></script>
+<script th:src="@{/js/reportes-admin.js}"></script>
 </body>
 </html>
