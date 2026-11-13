@@ -10,550 +10,173 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" th:href="@{/css/custom-styles.css}">
   <style>
-    /* Solo afecta a Reserva Directa. El formulario es el modal-content. */
-    #modalNuevaReserva form.modal-content {
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-      max-height: 100%;
-      overflow: hidden;
-      margin: 0;
-    }
-
-    #modalNuevaReserva .modal-header,
-    #modalNuevaReserva .modal-footer {
-      flex-shrink: 0;
-    }
-
-    #modalNuevaReserva .modal-body {
-      flex: 1 1 auto;
-      min-height: 0;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-    }
-
-    #modalNuevaReserva .modal-footer {
-      flex-wrap: wrap;
-      gap: .5rem;
-    }
+    #modalNuevaReserva form.modal-content { display:flex; flex-direction:column; min-height:0; max-height:100%; overflow:hidden; margin:0; }
+    #modalNuevaReserva .modal-header, #modalNuevaReserva .modal-footer { flex-shrink:0; }
+    #modalNuevaReserva .modal-body { flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain; }
+    #modalNuevaReserva .modal-footer { flex-wrap:wrap; gap:.5rem; }
   </style>
 </head>
 <body class="bg-light">
-
-<!-- Navbar Superior -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
   <div class="container-fluid px-4">
-    <a class="navbar-brand fw-bold" href="#">
-      <i class="bi bi-shield-lock-fill me-2"></i>Panel Administrador
-    </a>
+    <a class="navbar-brand fw-bold" href="#"><i class="bi bi-shield-lock-fill me-2"></i>Panel Administrador</a>
     <div class="d-flex align-items-center gap-3">
       <span class="text-white small"><i class="bi bi-person-circle me-1"></i> Admin General</span>
       <div class="d-flex gap-2">
-        <a th:href="@{${regresoUrl}}" class="btn btn-outline-light btn-sm">
-          <i class="bi bi-arrow-left"></i>
-          <span th:text="${regresoTexto}">Volver</span>
-        </a>
-        <form th:action="@{/logout}" method="post" class="m-0">
-          <button type="submit" class="btn btn-outline-light btn-sm">
-            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
-          </button>
-        </form>
+        <a th:href="@{${regresoUrl}}" class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-left"></i> <span th:text="${regresoTexto}">Volver</span></a>
+        <form th:action="@{/logout}" method="post" class="m-0"><button type="submit" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</button></form>
       </div>
     </div>
   </div>
 </nav>
-
-<div class="container my-4">
-  <div class="row g-3 mb-4">
+<div class="container my-4" id="dashboardAdminDatos" th:attr="data-url=@{/admin/dashboard/datos}">
+  <div class="row g-3 mb-3">
+    <div class="col-md-4"><div class="card border-0 shadow-sm p-3 border-start border-primary border-4 rounded-3"><div class="d-flex justify-content-between align-items-center"><div><p class="text-muted small mb-1">Usuarios activos</p><h3 class="fw-bold mb-0" id="totalUsuariosActivos">—</h3></div><i class="bi bi-people fs-1 text-primary" aria-hidden="true"></i></div></div></div>
+    <div class="col-md-4"><div class="card border-0 shadow-sm p-3 border-start border-success border-4 rounded-3"><div class="d-flex justify-content-between align-items-center"><div><p class="text-muted small mb-1">Espacios activos</p><h3 class="fw-bold mb-0" id="totalEspaciosActivos">—</h3></div><i class="bi bi-building fs-1 text-success" aria-hidden="true"></i></div></div></div>
     <div class="col-md-4">
-      <div class="card border-0 shadow-sm p-3 border-start border-primary border-4 rounded-3">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <p class="text-muted small mb-1">Total Usuarios</p>
-            <h3 class="fw-bold mb-0">24</h3>
-          </div>
-          <i class="bi bi-people fs-1 text-primary"></i>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card border-0 shadow-sm p-3 border-start border-success border-4 rounded-3">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <p class="text-muted small mb-1">Espacios Activos</p>
-            <h3 class="fw-bold mb-0">3</h3>
-          </div>
-          <i class="bi bi-building fs-1 text-success"></i>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card border-0 shadow-sm p-3 border-start border-warning border-4 rounded-3 h-100"
-           style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modalHistorialReservas">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <p class="text-muted small mb-1">Reservas del Mes</p>
-            <h3 class="fw-bold mb-0 text-dark">82</h3>
-            <span class="text-warning small fw-bold"><i class="bi bi-clock-history me-1"></i>Ver Historial</span>
-          </div>
-          <i class="bi bi-calendar-check fs-1 text-warning"></i>
-        </div>
-      </div>
+      <button type="button" class="card border-0 shadow-sm p-3 border-start border-warning border-4 rounded-3 h-100 w-100 text-start" data-bs-toggle="modal" data-bs-target="#modalHistorialReservas">
+        <span class="d-flex justify-content-between align-items-center w-100"><span><span class="d-block text-muted small mb-1">Reservas urgentes · <span id="mesResumenAdmin">mes actual</span></span><span class="d-block h3 fw-bold mb-0 text-dark" id="totalUrgenciasMes">—</span><span class="text-warning small fw-bold"><i class="bi bi-clock-history me-1"></i>Ver historial</span></span><i class="bi bi-calendar-check fs-1 text-warning" aria-hidden="true"></i></span>
+      </button>
     </div>
   </div>
-
+  <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
+    <p id="estadoResumenAdmin" class="small text-muted mb-0" role="status" aria-live="polite">Los datos aún no se han consultado.</p>
+    <button type="button" id="btnActualizarDashboard" class="btn btn-outline-secondary btn-sm">Actualizar datos</button>
+  </div>
+  <noscript><div class="alert alert-warning">Activa JavaScript para consultar contadores, agenda e historial. No se muestran cantidades de ejemplo.</div></noscript>
   <div th:if="${exitoEspacio != null}" class="alert alert-success" role="status" th:text="${exitoEspacio}"></div>
   <div th:if="${errorEspacio != null}" class="alert alert-danger" role="alert" th:text="${errorEspacio}"></div>
-
-  <!-- Gestión de espacios -->
   <div class="card border-0 shadow-sm rounded-3">
     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-      <h5 class="fw-bold mb-0 text-dark">
-        <i class="bi bi-door-open me-2 text-primary"></i>Gestión de Espacios Institucionales
-      </h5>
+      <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-door-open me-2 text-primary"></i>Gestión de Espacios Institucionales</h5>
       <div class="d-flex gap-2">
-        <button type="button" class="btn btn-info text-white fw-semibold" data-bs-toggle="modal" data-bs-target="#modalAgendaDisponibilidad">
-          <i class="bi bi-calendar3"></i> Ver Agenda
-        </button>
-        <button type="button" class="btn btn-outline-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalNuevoEspacio">
-          <i class="bi bi-plus-lg me-1"></i>Nuevo Espacio
-        </button>
-        <button type="button" class="btn btn-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalNuevaReserva">
-          <i class="bi bi-calendar-plus me-1"></i>Registrar Reserva
-        </button>
+        <button type="button" class="btn btn-info text-white fw-semibold" data-bs-toggle="modal" data-bs-target="#modalAgendaDisponibilidad"><i class="bi bi-calendar3"></i> Ver Agenda</button>
+        <button type="button" class="btn btn-outline-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalNuevoEspacio"><i class="bi bi-plus-lg me-1"></i>Nuevo Espacio</button>
+        <button type="button" class="btn btn-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalNuevaReserva"><i class="bi bi-calendar-plus me-1"></i>Registrar Reserva</button>
       </div>
     </div>
-    <div class="card-body p-0">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
-          <tr>
-            <th>Nombre del Espacio</th>
-            <th>Ubicación</th>
-            <th>Capacidad</th>
-            <th>Estado</th>
-            <th class="text-center">Acciones</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr th:if="${#lists.isEmpty(espacios)}">
-            <td colspan="5" class="text-center text-muted py-4">No hay espacios registrados.</td>
-          </tr>
-          <tr th:each="espacio : ${espacios}">
-            <td class="fw-bold" th:text="${espacio.nombreEspacio}"></td>
-            <td th:text="${espacio.ubicacion}"></td>
-            <td><span th:text="${espacio.capacidad}"></span> personas</td>
-            <td>
-              <span th:if="${espacio.activo == true}" class="badge bg-primary" th:text="${espacio.estadoActual}"></span>
-              <span th:unless="${espacio.activo == true}" class="badge bg-secondary">Desactivado</span>
-            </td>
-            <td class="text-center">
-              <a th:href="@{/admin/espacios/{id}/inventario(id=${espacio.id})}" class="btn btn-sm btn-outline-primary me-1">Inventario</a>
-              <button type="button" class="btn btn-sm btn-outline-secondary me-1" title="Editar espacio"
-                      data-bs-toggle="modal" data-bs-target="#modalEditarEspacio"
-                      th:attr="data-id=${espacio.id},data-nombre=${espacio.nombreEspacio},data-ubicacion=${espacio.ubicacion},data-capacidad=${espacio.capacidad},data-estado=${espacio.estadoActual}">
-                <i class="bi bi-pencil"></i>
-              </button>
-              <form th:action="@{/admin/espacios/activo}" method="post" class="d-inline">
-                <input type="hidden" name="id" th:value="${espacio.id}">
-                <input type="hidden" name="activo" th:value="${espacio.activo != true}">
-                <button type="submit" class="btn btn-sm"
-                        th:classappend="${espacio.activo == true ? 'btn-outline-danger' : 'btn-outline-success'}"
-                        th:text="${espacio.activo == true ? 'Desactivar' : 'Activar'}">Cambiar activación</button>
-              </form>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+      <thead class="table-light"><tr><th>Nombre del Espacio</th><th>Ubicación</th><th>Capacidad</th><th>Estado</th><th class="text-center">Acciones</th></tr></thead>
+      <tbody>
+      <tr th:if="${#lists.isEmpty(espacios)}"><td colspan="5" class="text-center text-muted py-4">No hay espacios registrados.</td></tr>
+      <tr th:each="espacio : ${espacios}">
+        <td class="fw-bold" th:text="${espacio.nombreEspacio}"></td><td th:text="${espacio.ubicacion}"></td><td><span th:text="${espacio.capacidad}"></span> personas</td>
+        <td><span th:if="${espacio.activo == true}" class="badge bg-primary" th:text="${espacio.estadoActual}"></span><span th:unless="${espacio.activo == true}" class="badge bg-secondary">Desactivado</span></td>
+        <td class="text-center">
+          <a th:href="@{/admin/espacios/{id}/inventario(id=${espacio.id})}" class="btn btn-sm btn-outline-primary me-1">Inventario</a>
+          <button type="button" class="btn btn-sm btn-outline-secondary me-1" title="Editar espacio" data-bs-toggle="modal" data-bs-target="#modalEditarEspacio" th:attr="data-id=${espacio.id},data-nombre=${espacio.nombreEspacio},data-ubicacion=${espacio.ubicacion},data-capacidad=${espacio.capacidad},data-estado=${espacio.estadoActual}"><i class="bi bi-pencil"></i></button>
+                    <!-- ELIMINACION SEGURA DE ESPACIOS v1 -->
+          <button type="button" class="btn btn-sm btn-outline-danger ms-1" data-bs-toggle="modal" data-bs-target="#modalEliminarEspacio" th:attr="data-id=${espacio.id},data-nombre=${espacio.nombreEspacio}"><i class="bi bi-trash" aria-hidden="true"></i> Eliminar</button>
+          <form th:action="@{/admin/espacios/activo}" method="post" class="d-inline"><input type="hidden" name="id" th:value="${espacio.id}"><input type="hidden" name="activo" th:value="${espacio.activo != true}"><button type="submit" class="btn btn-sm" th:classappend="${espacio.activo == true ? 'btn-outline-danger' : 'btn-outline-success'}" th:text="${espacio.activo == true ? 'Desactivar' : 'Activar'}">Cambiar activación</button></form>
+        </td>
+      </tr>
+      </tbody>
+    </table></div></div>
   </div>
 </div>
-
-<!-- MODAL 1: REGISTRAR NUEVO ESPACIO -->
-<div class="modal fade" id="modalNuevoEspacio" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title fw-bold"><i class="bi bi-building-add me-2"></i>Registrar Nuevo Espacio</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <form th:action="@{/admin/espacios}" method="post">
-        <div class="modal-body p-4">
-          <div class="mb-3">
-            <label for="nuevoNombreEspacio" class="form-label fw-bold small">Nombre del Espacio</label>
-            <input type="text" id="nuevoNombreEspacio" name="nombreEspacio" class="form-control"
-                   maxlength="100" placeholder="Ej. Laboratorio de Mecatrónica" required>
-          </div>
-          <div class="mb-3">
-            <label for="nuevaUbicacion" class="form-label fw-bold small">Ubicación / Edificio</label>
-            <input type="text" id="nuevaUbicacion" name="ubicacion" class="form-control"
-                   maxlength="150" placeholder="Ej. Edificio H" required>
-          </div>
-          <div class="row g-3 mb-3">
-            <div class="col-md-6">
-              <label for="nuevaCapacidad" class="form-label fw-bold small">Capacidad (personas)</label>
-              <input type="number" id="nuevaCapacidad" name="capacidad" class="form-control"
-                     min="1" max="2147483647" step="1" required>
-            </div>
-            <div class="col-md-6">
-              <label for="nuevoEstado" class="form-label fw-bold small">Estado Inicial</label>
-              <select id="nuevoEstado" name="estadoActual" class="form-select" required>
-                <option value="DISPONIBLE">Disponible</option>
-                <option value="MANTENIMIENTO">En mantenimiento</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer bg-light">
-          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary btn-sm fw-bold">Guardar Espacio</button>
-        </div>
-      </form>
+<!-- REGISTRAR ESPACIO: mismas acciones y campos -->
+<div class="modal fade" id="modalNuevoEspacio" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 shadow">
+  <div class="modal-header bg-primary text-white"><h5 class="modal-title fw-bold"><i class="bi bi-building-add me-2"></i>Registrar Nuevo Espacio</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+  <form th:action="@{/admin/espacios}" method="post">
+    <div class="modal-body p-4">
+      <div class="mb-3"><label for="nuevoNombreEspacio" class="form-label fw-bold small">Nombre del Espacio</label><input type="text" id="nuevoNombreEspacio" name="nombreEspacio" class="form-control" maxlength="100" placeholder="Ej. Laboratorio de Mecatrónica" required></div>
+      <div class="mb-3"><label for="nuevaUbicacion" class="form-label fw-bold small">Ubicación / Edificio</label><input type="text" id="nuevaUbicacion" name="ubicacion" class="form-control" maxlength="150" placeholder="Ej. Edificio H" required></div>
+      <div class="row g-3 mb-3"><div class="col-md-6"><label for="nuevaCapacidad" class="form-label fw-bold small">Capacidad (personas)</label><input type="number" id="nuevaCapacidad" name="capacidad" class="form-control" min="1" max="2147483647" step="1" required></div><div class="col-md-6"><label for="nuevoEstado" class="form-label fw-bold small">Estado Inicial</label><select id="nuevoEstado" name="estadoActual" class="form-select" required><option value="DISPONIBLE">Disponible</option><option value="MANTENIMIENTO">En mantenimiento</option></select></div></div>
     </div>
-  </div>
-</div>
-
-<!-- MODAL 2: RESERVA DIRECTA -->
-<div class="modal fade" id="modalNuevaReserva" tabindex="-1"
-     aria-labelledby="tituloReservaDirecta" aria-hidden="true">
+    <div class="modal-footer bg-light"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary btn-sm fw-bold">Guardar Espacio</button></div>
+  </form>
+</div></div></div>
+<!-- RESERVA DIRECTA: conserva nombres, IDs, rutas y controles de confirmación -->
+<div class="modal fade" id="modalNuevaReserva" tabindex="-1" aria-labelledby="tituloReservaDirecta" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-    <form id="formReservaDirecta" class="modal-content border-0 shadow"
-          th:action="@{/admin/reservas/validar-inicial}" method="post" enctype="multipart/form-data">
-      <div class="modal-header bg-success text-white">
-        <h5 class="modal-title fw-bold" id="tituloReservaDirecta">
-          <i class="bi bi-calendar-event me-2"></i>Registrar Reserva Directa
-        </h5>
-        <button type="button"
-                class="btn-close btn-close-white"
-                data-bs-dismiss="modal"
-                aria-label="Cerrar">
-        </button>
-      </div>
-
+    <form id="formReservaDirecta" class="modal-content border-0 shadow" th:action="@{/admin/reservas/validar-inicial}" method="post" enctype="multipart/form-data">
+      <div class="modal-header bg-success text-white"><h5 class="modal-title fw-bold" id="tituloReservaDirecta"><i class="bi bi-calendar-event me-2"></i>Registrar Reserva Directa</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
       <div class="modal-body p-4">
         <div class="border rounded p-3 mb-3">
-          <div class="form-check">
-            <input type="checkbox" id="reservaDirectaUrgencia" name="esUrgencia" value="true"
-                   class="form-check-input" aria-describedby="ayudaUrgenciaAdministrativa">
-            <label for="reservaDirectaUrgencia" class="form-check-label fw-bold small">Atender como urgencia administrativa</label>
-          </div>
-          <div id="ayudaUrgenciaAdministrativa" class="form-text">
-            Reserva normal: mínimo 72 horas de anticipación. Urgencia con recursos únicamente
-            del inventario escolar: mínimo 24 horas. Los recursos fuera del inventario escolar
-            o una requisición mantienen el mínimo de 72 horas y requieren revisión del supervisor.
-          </div>
-          <div id="bloqueMotivoUrgencia" class="mt-3" hidden>
-            <label for="reservaDirectaMotivoUrgencia" class="form-label fw-bold small">Motivo de la urgencia administrativa</label>
-            <textarea id="reservaDirectaMotivoUrgencia" name="motivoUrgencia" class="form-control"
-                      maxlength="255" rows="2" aria-describedby="ayudaMotivoUrgencia" disabled></textarea>
-            <div id="ayudaMotivoUrgencia" class="form-text">
-              Explica la razón de la urgencia; por ejemplo, falta de acceso al sistema u olvido de registrar la solicitud.
-            </div>
-          </div>
+          <div class="form-check"><input type="checkbox" id="reservaDirectaUrgencia" name="esUrgencia" value="true" class="form-check-input" aria-describedby="ayudaUrgenciaAdministrativa"><label for="reservaDirectaUrgencia" class="form-check-label fw-bold small">Atender como urgencia administrativa</label></div>
+          <div id="ayudaUrgenciaAdministrativa" class="form-text">Reserva normal: mínimo 72 horas de anticipación. Urgencia con recursos únicamente del inventario escolar: mínimo 24 horas. Los recursos fuera del inventario escolar o una requisición mantienen el mínimo de 72 horas y requieren revisión del supervisor.</div>
+          <div id="bloqueMotivoUrgencia" class="mt-3" hidden><label for="reservaDirectaMotivoUrgencia" class="form-label fw-bold small">Motivo de la urgencia administrativa</label><textarea id="reservaDirectaMotivoUrgencia" name="motivoUrgencia" class="form-control" maxlength="255" rows="2" aria-describedby="ayudaMotivoUrgencia" disabled></textarea><div id="ayudaMotivoUrgencia" class="form-text">Explica la razón de la urgencia; por ejemplo, falta de acceso al sistema u olvido de registrar la solicitud.</div></div>
         </div>
-        <div id="avisoModalidadReserva" class="alert alert-info mb-3" role="status" aria-live="polite">
-          Reserva normal: se requieren al menos 72 horas de anticipación.
+        <div id="avisoModalidadReserva" class="alert alert-info mb-3" role="status" aria-live="polite">Reserva normal: se requieren al menos 72 horas de anticipación.</div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6"><label for="selectEspacio" class="form-label fw-bold small">Seleccionar Espacio</label><select class="form-select" id="selectEspacio" name="espacioId" required><option value="" selected disabled>-- Selecciona un espacio --</option><option th:each="espacio : ${espacios}" th:if="${espacio.activo == true and espacio.estadoActual == 'DISPONIBLE'}" th:value="${espacio.id}" th:text="${espacio.nombreEspacio + ' - ' + espacio.ubicacion}" th:attr="data-inventario-url=@{/admin/espacios/{id}/inventario/datos(id=${espacio.id})}"></option></select></div>
+          <div class="col-md-6"><label for="reservaDirectaCorreo" class="form-label fw-bold small">Correo del titular solicitante</label><input type="email" id="reservaDirectaCorreo" name="correoSolicitante" class="form-control" maxlength="100" placeholder="titular@iguala.tecnm.mx" required></div>
         </div>
         <div class="row g-3 mb-3">
-          <div class="col-md-6">
-            <label for="selectEspacio" class="form-label fw-bold small">Seleccionar Espacio</label>
-            <select class="form-select"
-                    id="selectEspacio"
-                    name="espacioId"
-                    required>
-
-              <option value="" selected disabled>
-                -- Selecciona un espacio --
-              </option>
-
-              <option th:each="espacio : ${espacios}"
-                      th:if="${espacio.activo == true
-                   and espacio.estadoActual == 'DISPONIBLE'}"
-                      th:value="${espacio.id}"
-                      th:text="${espacio.nombreEspacio + ' - ' + espacio.ubicacion}"
-                      th:attr="data-inventario-url=@{/admin/espacios/{id}/inventario/datos(id=${espacio.id})}">
-              </option>
-
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label for="reservaDirectaCorreo" class="form-label fw-bold small">Correo del titular solicitante</label>
-            <input type="email" id="reservaDirectaCorreo" name="correoSolicitante" class="form-control"
-                   maxlength="100" placeholder="titular@iguala.tecnm.mx" required>
-          </div>
+          <div class="col-md-4"><label for="reservaDirectaFecha" class="form-label fw-bold small">Fecha del Evento</label><input type="date" id="reservaDirectaFecha" name="fechaEvento" class="form-control" required></div>
+          <div class="col-md-4"><label for="reservaDirectaHoraInicio" class="form-label fw-bold small">Hora de inicio</label><input type="time" id="reservaDirectaHoraInicio" name="horaInicio" class="form-control" step="60" required></div>
+          <div class="col-md-4"><label for="reservaDirectaHoraFin" class="form-label fw-bold small">Hora de fin</label><input type="time" id="reservaDirectaHoraFin" name="horaFin" class="form-control" step="60" required></div>
         </div>
-
-        <div class="row g-3 mb-3">
-          <div class="col-md-4">
-            <label for="reservaDirectaFecha" class="form-label fw-bold small">Fecha del Evento</label>
-            <input type="date" id="reservaDirectaFecha" name="fechaEvento" class="form-control" required>
-          </div>
-          <div class="col-md-4">
-            <label for="reservaDirectaHoraInicio" class="form-label fw-bold small">Hora de inicio</label>
-            <input type="time" id="reservaDirectaHoraInicio" name="horaInicio" class="form-control" step="60" required>
-          </div>
-          <div class="col-md-4">
-            <label for="reservaDirectaHoraFin" class="form-label fw-bold small">Hora de fin</label>
-            <input type="time" id="reservaDirectaHoraFin" name="horaFin" class="form-control" step="60" required>
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label for="reservaDirectaMotivo" class="form-label fw-bold small">Motivo / Nombre del Evento</label>
-          <input type="text" id="reservaDirectaMotivo" name="motivoEvento" class="form-control"
-                 maxlength="255" placeholder="Ej. Conferencia de Computación" required>
-        </div>
-
-        <hr class="my-4 text-muted">
-        <h6 class="fw-bold text-success mb-3"><i class="bi bi-box-seam me-2"></i>Equipamiento y Requisiciones</h6>
-
-        <div class="mb-3">
-          <p class="fw-bold small text-muted mb-2">Recursos Disponibles en Inventario (Marcar los requeridos)</p>
-          <div class="bg-light p-3 rounded border">
-            <p id="msgSinEspacio" class="text-muted small mb-0" role="status" aria-live="polite">
-              Selecciona un espacio para consultar su inventario.
-            </p>
-            <div id="gridInventario" class="row g-3 d-none"></div>
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label for="reservaDirectaRecursosExternos" class="form-label fw-bold small">Recursos Externos / Fuera de Inventario</label>
-          <textarea id="reservaDirectaRecursosExternos" name="recursosExternos" class="form-control" rows="3"
-                    aria-describedby="ayudaRecursosExternos" placeholder="Ej. 20 sillas adicionales, 2 ventiladores y 5 manteles."></textarea>
-          <div id="ayudaRecursosExternos" class="form-text">
-            Describe los recursos adicionales y sus cantidades. Deja este campo vacío si no los necesitas.
-          </div>
-          <div id="avisoRecursosExternos" class="alert alert-warning mt-3 mb-0" role="status" aria-live="polite" hidden>
-            Estás solicitando recursos que no pertenecen al inventario escolar.
-            Su solicitud no garantiza disponibilidad y requiere revisión del supervisor.
-            Esta comprobación inicial valida los PDF, pero no aprueba solicitudes ni guarda documentos.
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label for="reservaDirectaOficio" class="form-label fw-bold small">Oficio de reservación</label>
-          <input type="file"
-                 id="reservaDirectaOficio"
-                 name="oficioReservacion"
-                 class="form-control"
-                 accept=".pdf,application/pdf"
-                 aria-describedby="ayudaOficioReservacion">
-          <div id="ayudaOficioReservacion" class="form-text">
-            Obligatorio en todas las modalidades, incluida la urgencia administrativa.
-            Debe ser un PDF de hasta 3 MB (3,000,000 bytes).
-            La entrega posterior no está habilitada en esta comprobación inicial.
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label for="reservaDirectaRequisicion" class="form-label fw-bold small">Requisición de recursos externos</label>
-          <input type="file"
-                 id="reservaDirectaRequisicion"
-                 name="requisicion"
-                 class="form-control"
-                 accept=".pdf,application/pdf"
-                 aria-describedby="ayudaRequisicion">
-          <div id="ayudaRequisicion" class="form-text">
-            Obligatoria cuando se soliciten recursos fuera del inventario escolar, tengan o no costo.
-            Debe adjuntarse la requisición real en PDF de hasta 3 MB (3,000,000 bytes),
-            cuyo contenido será revisado por el supervisor.
-            La entrega posterior no está habilitada en esta comprobación inicial.
-          </div>
-        </div>
-
-        <div class="alert alert-secondary small mb-0">
-          Comprobar datos revisa el motivo, el titular y la anticipación:
-          mínimo 72 horas en modalidad normal y mínimo 24 horas en urgencia administrativa
-          con recursos únicamente del inventario escolar. Si hay recursos fuera del inventario
-          escolar o una requisición, se mantiene el mínimo de 72 horas y se requiere revisión
-          del supervisor. También revisa la disponibilidad del espacio con limpieza, las cantidades
-          de inventario, los documentos requeridos y el cupo mensual del
-          departamento para el mes del evento.
-          Cada PDF admite hasta 3 MB (3,000,000 bytes).
-          Exige oficio de reservación en todas las modalidades y, si solicitas recursos fuera del
-          inventario escolar, también requisición, independientemente de su costo.
-          Esta comprobación no consume cupos ni permite omitir documentos
-          por entrega posterior.
-          No aprueba solicitudes, no guarda documentos ni crea reservas, apartados o folios.
-        </div>
-
-        <div id="resultadoValidacionReserva" class="alert alert-info mt-3 mb-0" role="status"
-             aria-live="polite" tabindex="-1" hidden></div>
+        <div class="mb-3"><label for="reservaDirectaMotivo" class="form-label fw-bold small">Motivo / Nombre del Evento</label><input type="text" id="reservaDirectaMotivo" name="motivoEvento" class="form-control" maxlength="255" placeholder="Ej. Conferencia de Computación" required></div>
+        <hr class="my-4 text-muted"><h6 class="fw-bold text-success mb-3"><i class="bi bi-box-seam me-2"></i>Equipamiento y Requisiciones</h6>
+        <div class="mb-3"><p class="fw-bold small text-muted mb-2">Recursos Disponibles en Inventario (Marcar los requeridos)</p><div class="bg-light p-3 rounded border"><p id="msgSinEspacio" class="text-muted small mb-0" role="status" aria-live="polite">Selecciona un espacio para consultar su inventario.</p><div id="gridInventario" class="row g-3 d-none"></div></div></div>
+        <div class="mb-3"><label for="reservaDirectaRecursosExternos" class="form-label fw-bold small">Recursos Externos / Fuera de Inventario</label><textarea id="reservaDirectaRecursosExternos" name="recursosExternos" class="form-control" rows="3" aria-describedby="ayudaRecursosExternos" placeholder="Ej. 20 sillas adicionales, 2 ventiladores y 5 manteles."></textarea><div id="ayudaRecursosExternos" class="form-text">Describe los recursos adicionales y sus cantidades. Deja este campo vacío si no los necesitas.</div><div id="avisoRecursosExternos" class="alert alert-warning mt-3 mb-0" role="status" aria-live="polite" hidden>Estás solicitando recursos que no pertenecen al inventario escolar. Su solicitud no garantiza disponibilidad y requiere revisión del supervisor. Esta comprobación inicial valida los PDF, pero no aprueba solicitudes ni guarda documentos.</div></div>
+        <div class="mb-3"><label for="reservaDirectaOficio" class="form-label fw-bold small">Oficio de reservación</label><input type="file" id="reservaDirectaOficio" name="oficioReservacion" class="form-control" accept=".pdf,application/pdf" aria-describedby="ayudaOficioReservacion"><div id="ayudaOficioReservacion" class="form-text">Obligatorio en todas las modalidades, incluida la urgencia administrativa. Debe ser un PDF de hasta 3 MB (3,000,000 bytes). La entrega posterior no está habilitada en esta comprobación inicial.</div></div>
+        <div class="mb-3"><label for="reservaDirectaRequisicion" class="form-label fw-bold small">Requisición de recursos externos</label><input type="file" id="reservaDirectaRequisicion" name="requisicion" class="form-control" accept=".pdf,application/pdf" aria-describedby="ayudaRequisicion"><div id="ayudaRequisicion" class="form-text">Obligatoria cuando se soliciten recursos fuera del inventario escolar, tengan o no costo. Debe adjuntarse la requisición real en PDF de hasta 3 MB (3,000,000 bytes), cuyo contenido será revisado por el supervisor. La entrega posterior no está habilitada en esta comprobación inicial.</div></div>
+        <div class="alert alert-secondary small mb-0">Comprobar datos revisa el motivo, el titular y la anticipación: mínimo 72 horas en modalidad normal y mínimo 24 horas en urgencia administrativa con recursos únicamente del inventario escolar. Si hay recursos fuera del inventario escolar o una requisición, se mantiene el mínimo de 72 horas y se requiere revisión del supervisor. También revisa la disponibilidad del espacio con limpieza, las cantidades de inventario, los documentos requeridos y el cupo mensual del departamento para el mes del evento. Cada PDF admite hasta 3 MB (3,000,000 bytes). Exige oficio de reservación en todas las modalidades y, si solicitas recursos fuera del inventario escolar, también requisición, independientemente de su costo. Esta comprobación no consume cupos ni permite omitir documentos por entrega posterior. No aprueba solicitudes, no guarda documentos ni crea reservas, apartados o folios.</div>
+        <div id="resultadoValidacionReserva" class="alert alert-info mt-3 mb-0" role="status" aria-live="polite" tabindex="-1" hidden></div>
       </div>
-
       <div class="modal-footer bg-light">
-        <button type="button"
-                id="btnCancelarReserva"
-                class="btn btn-secondary btn-sm"
-                data-bs-dismiss="modal">
-          Cancelar
-        </button>
-
-        <button type="button"
-                id="btnComprobarReserva"
-                class="btn btn-outline-primary btn-sm fw-bold">
-          Comprobar datos
-        </button>
-
-        <button type="button"
-                id="btnConfirmarReserva"
-                class="btn btn-success btn-sm fw-bold"
-                disabled
-                title="El guardado de reservas todavía no está habilitado">
-          Confirmar Reserva
-        </button>
+        <button type="button" id="btnCancelarReserva" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" id="btnComprobarReserva" class="btn btn-outline-primary btn-sm fw-bold">Comprobar datos</button>
+        <button type="button" id="btnConfirmarReserva" class="btn btn-success btn-sm fw-bold" disabled title="El guardado de reservas todavía no está habilitado">Confirmar Reserva</button>
       </div>
     </form>
   </div>
 </div>
-
-<!-- MODAL 3: HISTORIAL DE RESERVAS -->
-<div class="modal fade" id="modalHistorialReservas" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content border-0 shadow">
-      <div class="modal-header bg-warning text-dark">
-        <h5 class="modal-title fw-bold"><i class="bi bi-clock-history me-2"></i>Historial General de Reservas Del Mes</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body p-0">
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-            <tr>
-              <th>Folio</th><th>Solicitante</th><th>Espacio</th><th>Fecha Evento</th>
-              <th>Horario</th><th>F. Registro</th><th>Estado</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr><td colspan="7" class="text-center text-muted py-4">Historial pendiente de conectar.</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="modal-footer bg-light">
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
-      </div>
-    </div>
+<!-- HISTORIAL: únicamente modalidades urgentes, de todos los administradores -->
+<div class="modal fade" id="modalHistorialReservas" tabindex="-1" aria-labelledby="tituloHistorialAdmin" aria-hidden="true"><div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"><div class="modal-content border-0 shadow">
+  <div class="modal-header bg-warning text-dark"><h5 class="modal-title fw-bold" id="tituloHistorialAdmin"><i class="bi bi-clock-history me-2"></i>Historial de reservas urgentes</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+  <div class="modal-body">
+    <div class="row g-3 align-items-end mb-3"><div class="col-md-4"><label for="mesHistorialAdmin" class="form-label fw-bold">Mes del evento</label><input type="month" id="mesHistorialAdmin" class="form-control" min="1900-01" max="2200-12"></div><div class="col-md-8"><p class="small text-muted mb-0">Urgencias administrativas de 24 y 72 horas registradas por los administradores. Incluye sus distintos estados. Las solicitudes normales no forman parte de este historial.</p></div></div>
+    <p id="estadoHistorialAdmin" class="small mb-3" role="status" aria-live="polite">Selecciona un mes para consultar.</p>
+    <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Folio</th><th>Solicitante / Departamento</th><th>Espacio</th><th>Fecha del evento</th><th>Horario</th><th>Registro</th><th>Estado</th></tr></thead><tbody id="cuerpoHistorialAdmin"><tr><td colspan="7" class="text-center text-muted py-4">El historial todavía no se ha consultado.</td></tr></tbody></table></div>
   </div>
-</div>
-
-<!-- MODAL 4: AGENDA Y DISPONIBILIDAD -->
-<div class="modal fade" id="modalAgendaDisponibilidad" tabindex="-1" aria-labelledby="modalAgendaLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg">
-      <div class="modal-header bg-info text-white">
-        <h5 class="modal-title fw-bold" id="modalAgendaLabel"><i class="bi bi-calendar-check me-2"></i> Consulta de Agenda y Disponibilidad</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body p-4">
-        <div class="row g-3 mb-4">
-          <div class="col-md-6">
-            <label for="selectEspacioAgenda" class="form-label fw-bold">Seleccionar Espacio</label>
-            <select class="form-select" id="selectEspacioAgenda">
-              <option value="todos">-- Todos los Espacios --</option>
-              <option value="1">Sala Magna</option>
-              <option value="2">Sala Audiovisual</option>
-              <option value="3">Domo (Cancha Techada)</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label for="inputFechaAgenda" class="form-label fw-bold">Seleccionar Fecha</label>
-            <input type="date" class="form-control" id="inputFechaAgenda" value="2026-09-21">
-          </div>
-        </div>
-        <div class="d-flex gap-3 mb-3 small">
-          <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Disponible</span>
-          <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Ocupado / Reservado</span>
-          <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>Pendiente Aprobación</span>
-        </div>
-        <div class="table-responsive border rounded">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-            <tr><th>Horario</th><th>Espacio</th><th>Estado</th><th>Evento / Solicitante</th></tr>
-            </thead>
-            <tbody>
-            <tr>
-              <td>08:00 - 10:00</td><td>Sala Magna</td>
-              <td><span class="badge bg-success">Disponible</span></td>
-              <td class="text-muted"><em>Libre para reserva</em></td>
-            </tr>
-            <tr>
-              <td>10:00 - 12:00</td><td>Sala Magna</td>
-              <td><span class="badge bg-danger">Ocupado</span></td>
-              <td>Reunión de Academia ISC (Dr. Gómez)</td>
-            </tr>
-            <tr>
-              <td>12:00 - 14:00</td><td>Sala Magna</td>
-              <td><span class="badge bg-warning text-dark">Pendiente</span></td>
-              <td>Conferencia de Ciberseguridad</td>
-            </tr>
-            <tr>
-              <td>14:00 - 16:00</td><td>Sala Magna</td>
-              <td><span class="badge bg-success">Disponible</span></td>
-              <td class="text-muted"><em>Libre para reserva</em></td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="modal-footer bg-light">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalNuevaReserva">
-          <i class="bi bi-calendar-plus me-1"></i> Ir a Registrar Reserva
-        </button>
-      </div>
-    </div>
+  <div class="modal-footer bg-light justify-content-between"><div class="d-flex flex-wrap align-items-center gap-2"><button type="button" id="historialAnteriorAdmin" class="btn btn-outline-secondary btn-sm" disabled>Anterior</button><span id="paginacionHistorialAdmin" class="small"></span><button type="button" id="historialSiguienteAdmin" class="btn btn-outline-secondary btn-sm" disabled>Siguiente</button></div><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button></div>
+</div></div></div>
+<!-- AGENDA: todas las modalidades; incluye márgenes de limpieza -->
+<div class="modal fade" id="modalAgendaDisponibilidad" tabindex="-1" aria-labelledby="modalAgendaLabel" aria-hidden="true"><div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"><div class="modal-content border-0 shadow-lg">
+  <div class="modal-header bg-info text-dark"><h5 class="modal-title fw-bold" id="modalAgendaLabel"><i class="bi bi-calendar-check me-2"></i>Agenda y disponibilidad</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+  <div class="modal-body p-4">
+    <div class="row g-3 align-items-end mb-3"><div class="col-md-5"><label for="selectEspacioAgenda" class="form-label fw-bold">Espacio</label><select class="form-select" id="selectEspacioAgenda" disabled><option value="">Consultando espacios…</option></select></div><div class="col-md-4"><label for="inputFechaAgenda" class="form-label fw-bold">Fecha</label><input type="date" class="form-control" id="inputFechaAgenda" min="1900-01-01" max="2200-12-31"></div><div class="col-md-3"><button type="button" id="btnActualizarAgendaAdmin" class="btn btn-outline-primary w-100">Actualizar agenda</button></div></div>
+    <div class="d-flex flex-wrap gap-2 mb-3 small"><span class="badge bg-success">Disponible</span><span class="badge bg-danger">Ocupado</span><span class="badge bg-warning text-dark">Pendiente: sí bloquea</span><span class="badge bg-info text-dark">Limpieza</span><span class="badge bg-secondary">Margen previo</span><span class="badge bg-dark">No disponible</span></div>
+    <div class="alert alert-light border small">La agenda incluye todas las modalidades. Una reserva pendiente ya está guardada y ocupa el espacio. El margen previo indica el tiempo que debe quedar antes del siguiente evento para limpiar después de una reserva nueva. Se muestra el día completo para no inventar horarios de apertura; esto no modifica la anticipación ni aparta horarios. La confirmación revisa nuevamente todas las condiciones.</div>
+    <p id="estadoAgendaAdmin" class="small" role="status" aria-live="polite">La agenda todavía no se ha consultado.</p>
+    <div class="table-responsive border rounded"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Horario</th><th>Espacio</th><th>Estado</th><th>Detalle</th></tr></thead><tbody id="cuerpoAgendaAdmin"><tr><td colspan="4" class="text-center text-muted py-4">Selecciona una fecha para consultar datos reales.</td></tr></tbody></table></div>
   </div>
-</div>
-
-<!-- MODAL: EDITAR ESPACIO -->
-<div class="modal fade" id="modalEditarEspacio" tabindex="-1" aria-labelledby="tituloEditarEspacio" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="tituloEditarEspacio">Editar espacio</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <form th:action="@{/admin/espacios/editar}" method="post">
-        <input type="hidden" id="editarId" name="id">
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="editarNombre" class="form-label">Nombre del espacio</label>
-            <input type="text" id="editarNombre" name="nombreEspacio" class="form-control" maxlength="100" required>
-          </div>
-          <div class="mb-3">
-            <label for="editarUbicacion" class="form-label">Ubicación</label>
-            <input type="text" id="editarUbicacion" name="ubicacion" class="form-control" maxlength="150" required>
-          </div>
-          <div class="mb-3">
-            <label for="editarCapacidad" class="form-label">Capacidad (personas)</label>
-            <input type="number" id="editarCapacidad" name="capacidad" class="form-control"
-                   min="1" max="2147483647" step="1" required>
-          </div>
-          <div class="mb-3">
-            <label for="editarEstado" class="form-label">Estado</label>
-            <select id="editarEstado" name="estadoActual" class="form-select" required>
-              <option value="DISPONIBLE">Disponible</option>
-              <option value="MANTENIMIENTO">En mantenimiento</option>
-            </select>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar cambios</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
+  <div class="modal-footer bg-light"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevaReserva"><i class="bi bi-calendar-plus me-1"></i>Ir a registrar reserva</button></div>
+</div></div></div>
+<!-- EDITAR ESPACIO: mismas acciones y campos -->
+<div class="modal fade" id="modalEditarEspacio" tabindex="-1" aria-labelledby="tituloEditarEspacio" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+  <div class="modal-header bg-primary text-white"><h5 class="modal-title" id="tituloEditarEspacio">Editar espacio</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+  <form th:action="@{/admin/espacios/editar}" method="post"><input type="hidden" id="editarId" name="id">
+    <div class="modal-body"><div class="mb-3"><label for="editarNombre" class="form-label">Nombre del espacio</label><input type="text" id="editarNombre" name="nombreEspacio" class="form-control" maxlength="100" required></div><div class="mb-3"><label for="editarUbicacion" class="form-label">Ubicación</label><input type="text" id="editarUbicacion" name="ubicacion" class="form-control" maxlength="150" required></div><div class="mb-3"><label for="editarCapacidad" class="form-label">Capacidad (personas)</label><input type="number" id="editarCapacidad" name="capacidad" class="form-control" min="1" max="2147483647" step="1" required></div><div class="mb-3"><label for="editarEstado" class="form-label">Estado</label><select id="editarEstado" name="estadoActual" class="form-select" required><option value="DISPONIBLE">Disponible</option><option value="MANTENIMIENTO">En mantenimiento</option></select></div></div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary">Guardar cambios</button></div>
+  </form>
+</div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script th:src="@{/js/main.js}"></script>
 <script th:src="@{/js/espacios.js}"></script>
 <script th:src="@{/js/reserva-inventario.js}"></script>
 <script th:src="@{/js/recursos-externos.js}"></script>
 <script th:src="@{/js/reserva-validacion.js}"></script>
+<script th:src="@{/js/dashboard-admin.js}"></script>
+<!-- ELIMINACION SEGURA DE ESPACIOS v1: no modifica los modales de reservas -->
+<div class="modal fade" id="modalEliminarEspacio" tabindex="-1" aria-labelledby="tituloEliminarEspacio" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title" id="tituloEliminarEspacio">Eliminar espacio registrado por error</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+    <form th:action="@{/admin/espacios/eliminar}" method="post" id="formEliminarEspacio">
+      <div class="modal-body">
+        <input type="hidden" id="eliminarEspacioId" name="id" value="">
+        <p>Espacio: <strong id="eliminarEspacioNombre"></strong></p>
+        <p>Solo se eliminara si no tiene reservas, inventario ni recursos registrados. No se borra historial ni se reintegran cupos.</p>
+        <div class="alert alert-warning">Si dejo de pertenecer al departamento o tiene registros, usa <strong>Desactivar</strong>. Las reservas existentes se conservan.</div>
+        <div class="form-check"><input class="form-check-input" type="checkbox" id="confirmarEliminarEspacio" name="confirmacion" value="ELIMINAR" required><label class="form-check-label" for="confirmarEliminarEspacio">Confirmo que fue registrado por error y deseo eliminarlo definitivamente.</label></div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-danger" id="btnEliminarEspacioDefinitivo" disabled>Eliminar definitivamente</button></div>
+    </form>
+  </div></div>
+</div>
+<script th:src="@{/js/espacio-eliminar.js}"></script>
 </body>
 </html>

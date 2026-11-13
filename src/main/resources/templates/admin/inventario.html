@@ -226,6 +226,20 @@
                            class="btn btn-sm btn-outline-primary">
                             Editar
                         </a>
+                        <!-- ELIMINACION PROTEGIDA INVENTARIO v1 -->
+                        <form th:action="@{/admin/espacios/{espacioId}/inventario/{articuloId}/eliminar(espacioId=${espacio.id},articuloId=${articulo.id})}"
+                              method="post" class="mt-2 p-2 border rounded">
+                            <div class="small text-muted mb-1">Eliminar retira el articulo completo con toda su cantidad. Solo se permite si el espacio no tiene reservas y el articulo no tiene registros asociados.</div>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" name="confirmacion" value="ELIMINAR"
+                                       th:id="|confirmarEliminarArticulo-${articulo.id}|" required>
+                                <label class="form-check-label small" th:for="|confirmarEliminarArticulo-${articulo.id}|">
+                                    Confirmo eliminar <strong th:text="${articulo.nombreItem}"></strong>
+                                    (cantidad: <span th:text="${articulo.cantidad}"></span>) registrado por error.
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar articulo</button>
+                        </form>
                     </td>
 
                 </tr>
