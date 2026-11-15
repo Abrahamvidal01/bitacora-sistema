@@ -1,0 +1,27 @@
+-- Deliberately outside db/migration. Opt-in only; no changes to existing rows.
+CREATE TABLE revision_urgencias_eventos (
+ id BIGINT NOT NULL AUTO_INCREMENT,
+ clave_operacion CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ solicitud_id BIGINT NOT NULL,
+ actor_usuario_id BIGINT NOT NULL,
+ firma_payload CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ version_esperada CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ revision_antes BIGINT NOT NULL,
+ revision_despues BIGINT NOT NULL,
+ estado_antes VARCHAR(30) NOT NULL,
+ estado_despues VARCHAR(30) NOT NULL,
+ documentos_antes VARCHAR(20) NOT NULL,
+ documentos_despues VARCHAR(20) NOT NULL,
+ accion VARCHAR(30) NOT NULL,
+ motivo VARCHAR(255) NOT NULL,
+ documentos_revisados BOOLEAN NOT NULL,
+ cupo_reintegrado BOOLEAN NOT NULL,
+ fecha_registro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ PRIMARY KEY (id),
+ UNIQUE KEY uk_revision_urgencias_clave (clave_operacion),
+ UNIQUE KEY uk_revision_urgencias_numero (solicitud_id, revision_despues),
+ CONSTRAINT fk_revision_urgencias_solicitud FOREIGN KEY (solicitud_id) REFERENCES solicitudes_espacio(id) ON DELETE RESTRICT,
+ CONSTRAINT fk_revision_urgencias_actor FOREIGN KEY (actor_usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT,
+ CONSTRAINT ck_revision_urgencias_secuencia CHECK (revision_antes >= 0 AND revision_despues = revision_antes + 1),
+ CONSTRAINT ck_revision_urgencias_documentos CHECK (documentos_despues IN ('PENDIENTE','VALIDADA','OBSERVADA','NO_APLICA'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
