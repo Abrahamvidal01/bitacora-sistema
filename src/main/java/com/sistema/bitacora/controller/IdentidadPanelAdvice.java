@@ -53,10 +53,6 @@ public class IdentidadPanelAdvice {
         String rol;
         if (rolesEfectivos.contains(objetivo)) {
             rol = objetivo;
-        } else if ("SUPERVISOR".equals(objetivo) && rolesEfectivos.contains("ADMINISTRADOR")) {
-            // La seguridad existente permite ADMINISTRADOR en /supervisor/**.
-            // Mostrar su rol real, sin inventarle un nombramiento de supervisor.
-            rol = "ADMINISTRADOR";
         } else {
             throw prohibido();
         }

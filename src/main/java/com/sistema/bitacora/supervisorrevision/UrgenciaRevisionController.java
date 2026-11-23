@@ -13,7 +13,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @RestController
 @RequestMapping("/supervisor/api/urgencias")
 @ConditionalOnProperty(name="bitacora.supervisor.revision-habilitada", havingValue="true")
-@PreAuthorize("hasAnyRole('ADMINISTRADOR','SUPERVISOR')")
+@PreAuthorize("hasRole('SUPERVISOR')")
 public class UrgenciaRevisionController {
     private final UrgenciaRevisionService service;
     public UrgenciaRevisionController(UrgenciaRevisionService service) { this.service=service; }

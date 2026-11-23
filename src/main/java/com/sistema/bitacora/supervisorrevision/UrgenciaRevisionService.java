@@ -17,7 +17,7 @@ import java.util.*;
 
 @Service
 @ConditionalOnProperty(name="bitacora.supervisor.revision-habilitada", havingValue="true")
-@PreAuthorize("hasAnyRole('ADMINISTRADOR','SUPERVISOR')")
+@PreAuthorize("hasRole('SUPERVISOR')")
 public class UrgenciaRevisionService {
     private final EntityManager em;
     private final UsuarioRepository usuarios;
@@ -32,7 +32,7 @@ public class UrgenciaRevisionService {
     public record Resource(long inventarioId,int cantidad,String nombre,String estadoHistorico) {}
     public record Row(long id,String folio,String solicitante,long departamentoOriginalId,String departamentoOriginal,
                       long espacioId,String espacio,String fecha,String inicio,String fin,
-                      String motivo,String modalidad,String estado,String documentos,long revision,String version,
+                      String motivo,String recursosExternos,String modalidad,String estado,String documentos,long revision,String version,
                       boolean oficioRegistrado,boolean requisicionRegistrada,List<Resource> recursos) {}
     public record Month(String mes,int total,long pendientes,long aprobadas,long rechazadas,List<Row> solicitudes) {}
     public record Result(long solicitudId,long revision,String estado,String documentos,boolean repetida) {}
@@ -50,7 +50,7 @@ public class UrgenciaRevisionService {
     private void checkActor(Usuario u,Authentication a) {
         Set<String> session = new HashSet<>(); a.getAuthorities().forEach(x -> session.add(x.getAuthority()));
         if (!Boolean.TRUE.equals(u.getActivo()) || u.getRoles()==null || u.getRoles().stream().noneMatch(r -> r!=null &&
-                Set.of("ADMINISTRADOR","SUPERVISOR").contains(r.getNombreRol()) && session.contains("ROLE_"+r.getNombreRol())))
+                "SUPERVISOR".equals(r.getNombreRol()) && session.contains("ROLE_"+r.getNombreRol())))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,"La cuenta debe estar activa y conservar un rol autorizado en la sesión y en la base de datos");
     }
     @Transactional(propagation=Propagation.REQUIRES_NEW,isolation=Isolation.READ_COMMITTED,readOnly=true,timeout=30)
@@ -92,7 +92,7 @@ public class UrgenciaRevisionService {
         String mode=mode(s.getId()); Last last=last(s); List<Resource> r=resources(s.getId());
         return new Row(s.getId(),s.getFolio(),s.getUsuario().getNombreCompleto(),s.getDepartamentoSolicitante().getId(),s.getDepartamentoSolicitante().getNombreDepartamento(),
                 s.getEspacio().getId(),s.getEspacio().getNombreEspacio(),s.getFechaEvento().toString(),s.getHoraInicio().toString(),s.getHoraFin().toString(),
-                s.getMotivoEvento(),mode,s.getEstatusSolicitud(),last.docs(),last.revision(),version(s,mode,last,r),
+                s.getMotivoEvento(),s.getRecursosExternos(),mode,s.getEstatusSolicitud(),last.docs(),last.revision(),version(s,mode,last,r),
                 s.getRutaOficioReservacion()!=null,s.getRutaRequisicion()!=null,r);
     }
     @Transactional(propagation=Propagation.REQUIRES_NEW,isolation=Isolation.REPEATABLE_READ,readOnly=true,timeout=30)

@@ -26,9 +26,9 @@ public class TestController {
         return ResponseEntity.ok(Map.of("mensaje", " Acceso concedido: Tienes el rol de ADMINISTRADOR."));
     }
 
-    // Accessible por SUPERVISOR o ADMINISTRADOR
+    // Accesible solo con el rol SUPERVISOR.
     @GetMapping("/supervisor")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUPERVISOR')")
+    @PreAuthorize("hasRole('SUPERVISOR')")
     public ResponseEntity<?> testSupervisor() {
         return ResponseEntity.ok(Map.of("mensaje", " Acceso concedido: Tienes el rol de SUPERVISOR o ADMIN."));
     }

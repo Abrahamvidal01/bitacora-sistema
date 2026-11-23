@@ -38,3 +38,13 @@ build/
 
 # Respaldo local: no publicar datos
 /respaldo_bitacora_espacios.sql
+# Registros y copia local de revision
+/maven_run.log
+/run_actual.log
+/revision-supervisor/
+
+# Secretos locales
+*.dpapi
+.env
+.env.*
+!.env.example

@@ -72,7 +72,7 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**")
                         .hasRole("ADMINISTRADOR")
                         .requestMatchers("/supervisor/**")
-                        .hasAnyRole("ADMINISTRADOR", "SUPERVISOR")
+                        .hasRole("SUPERVISOR")
                         .requestMatchers("/solicitante/**")
                         .hasRole("SOLICITANTE")
                         .anyRequest().authenticated()
